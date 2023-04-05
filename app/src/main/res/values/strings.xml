@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Interval Alarm</string>
+
+    <string name="alarm_card_button_enabled">STOP IT</string>
+    <string name="alarm_card_button_disabled">START</string>
+    <string name="alarm_card_button_scheduled">SCHEDULED</string>
+
+</resources>

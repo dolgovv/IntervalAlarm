@@ -1,0 +1,20 @@
+<resources>
+    <string name="low_second_amount_dialog_title">Wrong interval!</string>
+    <string name="low_second_amount_dialog_message">You can`t set the interval for less then 15 seconds</string>
+
+    <string name="zero_interval_dialog_title">No interval chosen</string>
+    <string name="zero_interval_dialog_message">To make an interval alarm, please, choose the interval you would like to use</string>
+
+    <string name="delete_alarm_dialog_title">Are you sure?</string>
+    <string name="delete_alarm_dialog_message">You are about to delete this alarm. Click "OK" to continue</string>
+
+    <string name="save_edited_alarm_dialog_title">You are about to save the edited alarm</string>
+    <string name="save_edited_alarm_dialog_message">Are you sure you want to save the edits?</string>
+
+    <string name="cancel_edits_dialog_title">Changes are not saved</string>
+    <string name="cancel_edits_dialog_message">Are you sure you want to cancel it?</string>
+
+    <string name="passed_time_chosen_dialog_title">You can`t schedule it to the past</string>
+    <string name="passed_time_chosen_dialog_message">Please, choose a valid time.\nTip: you can schedule it to at least 1 minute in future</string>
+
+</resources>
