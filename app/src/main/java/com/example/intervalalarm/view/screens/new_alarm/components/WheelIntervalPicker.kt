@@ -1,9 +1,6 @@
 package com.example.intervalalarm.view.screens.new_alarm.components
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.ScrollableState
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -36,8 +33,8 @@ fun WheelIntervalPicker(
     defaultMinute: Int = 5,
     defaultSecond: Int = 5,
 
-    status: WheelPickerStatus = WheelPickerStatus.Enabled
-
+    status: WheelPickerStatus = WheelPickerStatus.Enabled,
+    highlightedNumbersColor: Color = MaterialTheme.colors.primary
 ) {
     val isEnabled = status == WheelPickerStatus.Enabled
 
@@ -68,9 +65,6 @@ fun WheelIntervalPicker(
         }
     }
 
-    val highlightedNumbersColor =
-        if (isEnabled) MaterialTheme.colors.primary else MaterialTheme.colors.primary.copy(
-            alpha = 0.7f )
     val secondaryNumbersColor = if (isEnabled) Color.Gray else MaterialTheme.colors.background
 
     Surface(
@@ -113,7 +107,7 @@ fun WheelIntervalPicker(
                             Column(
                                 modifier = Modifier
                                     .size(70.dp)
-                                    .clickable(enabled = item in 0..23 ) {
+                                    .clickable(enabled = item in 0..23) {
                                         if (state.currentHour != item) {
                                             updateHour(item)
                                             touchCoroutine.launch {
@@ -192,7 +186,7 @@ fun WheelIntervalPicker(
                                     fontSize = 46.sp,
                                     color = if (highlightedMinute.value == item) highlightedNumbersColor else secondaryNumbersColor
                                 )
-                                    Divider()
+                                Divider()
                             }
                         }
                     }
@@ -253,7 +247,7 @@ fun WheelIntervalPicker(
                                     fontSize = 46.sp,
                                     color = if (highlightedSecond.value == item) highlightedNumbersColor else secondaryNumbersColor
                                 )
-                                    Divider()
+                                Divider()
                             }
                         }
                     }

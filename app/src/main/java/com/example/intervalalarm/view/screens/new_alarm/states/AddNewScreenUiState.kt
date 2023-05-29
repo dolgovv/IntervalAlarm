@@ -1,8 +1,6 @@
 package com.example.intervalalarm.view.screens.new_alarm.states
 
-import com.example.intervalalarm.model.database.AlarmEntity
-
-data class NewDayScreenUiState(
+data class AddNewScreenUiState(
 
     val title: String = "",
     val description: String = "",
@@ -10,6 +8,4 @@ data class NewDayScreenUiState(
     val wheelPickerState: WheelPickerUiState = WheelPickerUiState(0,0,0),
 
     val showBackPressedDialog: Boolean = false
-
-//    val notyet_label: Int = 1 TODO
 )

@@ -3,11 +3,11 @@ package com.example.intervalalarm.view.screens.home.states
 import com.example.intervalalarm.model.database.AlarmEntity
 
 data class AlarmUiState(
-    val id: String = "",
+    val id: String = "null",
     val count: Int = 1,
     val status: AlarmStatus = AlarmStatus.Disabled,
-    val hours: Int = 0, //or LONG
-    val minutes: Int = 0, //or LONG
+    val hours: Int = 0,
+    val minutes: Int = 0,
     val seconds: Int = 0,
     val title: String = "",
     val description: String = "",

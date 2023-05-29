@@ -1,11 +1,8 @@
 package com.example.intervalalarm.view.screens.new_alarm
 
 import android.content.res.Configuration
-import android.util.Log
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -17,36 +14,35 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.intervalalarm.model.database.AlarmEntity
 import com.example.intervalalarm.ui.theme.IntervalAlarmTheme
-import com.example.intervalalarm.view.screens.home.components.AddNewAlarmButton
-import com.example.intervalalarm.view.screens.navigation.Screens
+import com.example.intervalalarm.view.screens.home.components.IntervalFloatButton
+import com.example.intervalalarm.view.screens.home.states.AlarmUiState
 import com.example.intervalalarm.view.screens.new_alarm.components.AdditionalInfoCard
 import com.example.intervalalarm.view.screens.new_alarm.components.DialogType
 import com.example.intervalalarm.view.screens.new_alarm.components.PreventDialog
 import com.example.intervalalarm.view.screens.new_alarm.components.WheelIntervalPicker
+import com.example.intervalalarm.view.screens.new_alarm.states.AddNewScreenUiState
 import com.example.intervalalarm.viewmodel.MainViewModel
-import kotlin.random.Random
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun NewAlarmScreen(
+    state: AddNewScreenUiState,
+    list: List<AlarmUiState>,
     vm: MainViewModel,
     navController: NavController,
     onBackPressed: () -> Unit
 ) {
     val context = LocalContext.current
 
-    val state = vm.addNewAlarmUiState.collectAsState()
-    val list = vm.homeScreenUiState.collectAsState().value.allAlarms
+//    val list = vm.homeScreenUiState.collectAsState().value.allAlarms
 
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
+
     BackHandler(true) { onBackPressed() }
 
     val title = remember { mutableStateOf("") }
@@ -54,13 +50,10 @@ fun NewAlarmScreen(
     val showZeroIntervalDialog = remember { mutableStateOf(false) }
     val showLowSecondAmountDialog = remember { mutableStateOf(false) }
 
-    val addingNewRationale = remember {
-        derivedStateOf {
-            state.value.wheelPickerState.currentHour != 0
-                    || state.value.wheelPickerState.currentMinute != 0
-                    || state.value.wheelPickerState.currentSecond > 14
-        }
-    }
+    val isIntervalValid = ((state.wheelPickerState.currentHour != 0)
+            || (state.wheelPickerState.currentMinute != 0)
+            || (state.wheelPickerState.currentSecond > 14))
+
 
     Column(
         modifier = Modifier
@@ -69,7 +62,7 @@ fun NewAlarmScreen(
         verticalArrangement = Arrangement.Top
     ) {
 
-        if (state.value.showBackPressedDialog) {
+        if (state.showBackPressedDialog) {
             PreventDialog(
                 type = DialogType.Cancel,
                 hideDialog = { vm.hideBackPressedNewAlarmDialog() },
@@ -121,7 +114,7 @@ fun NewAlarmScreen(
 
             /** WHEEL PICKER */
             WheelIntervalPicker(
-                state = state.value.wheelPickerState,
+                state = state.wheelPickerState,
                 updateHour = { vm.updateNewHour(it) },
                 updateMinute = { vm.updateNewMinute(it) },
                 updateSeconds = { vm.updateNewSecond(it) }
@@ -155,8 +148,8 @@ fun NewAlarmScreen(
 
         /** DESCRIPTION AND SCHEDULE PICKER */
         AdditionalInfoCard(
-            description = state.value.description,
-            schedule = state.value.schedule,
+            description = state.description,
+            schedule = state.schedule,
             onDescriptionChanged = {
                 vm.updateDescription(it)
             },
@@ -165,45 +158,46 @@ fun NewAlarmScreen(
             },
             focusManager,
             keyboardController,
-            isEnabled = true
+            isEditable = true
         )
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(12.dp),
+                .padding(8.dp),
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.End
         ) {
 
             /** ADD NEW ALARM BUTTON */
-            AddNewAlarmButton(
-                addNew = {
-                    if (addingNewRationale.value) {
+            IntervalFloatButton(
+                function = {
+                    if (isIntervalValid) {
                         vm.addNewAlarm(
                             context,
                             AlarmEntity(
                                 alarmCount = if (list.isNotEmpty()) list.last().count + 1 else 1,
-                                isActive = state.value.schedule.isEmpty(),
-                                hours = state.value.wheelPickerState.currentHour,
-                                minutes = state.value.wheelPickerState.currentMinute,
-                                seconds = state.value.wheelPickerState.currentSecond,
+                                isActive = state.schedule.isEmpty(),
+                                hours = state.wheelPickerState.currentHour,
+                                minutes = state.wheelPickerState.currentMinute,
+                                seconds = state.wheelPickerState.currentSecond,
                                 title = title.value.ifEmpty {
                                     "Alarm no. ${if (list.isNotEmpty()) list.last().count + 1 else 1}" },
-                                description = state.value.description,
-                                schedule = state.value.schedule
+                                description = state.description,
+                                schedule = state.schedule
                             )
                         )
                         navController.popBackStack()
                         vm.clearNewAlarm()
-                    } else if (state.value.wheelPickerState.currentSecond in 1..9) {
+                    } else if (state.wheelPickerState.currentSecond in 1..14) {
                         showLowSecondAmountDialog.value = true
-                    } else {
+                    }
+                    else {
                         showZeroIntervalDialog.value = true
                     }
                 },
                 hasIcon = false,
-                isScheduled = state.value.schedule.isNotEmpty()
+                isScheduled = state.schedule.isNotEmpty()
             )
         }
     }

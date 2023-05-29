@@ -37,5 +37,4 @@ object DataModule {
     fun provideRepository(dao: AlarmsDAO): AlarmsRepository{
         return AlarmsRepository(dao = dao)
     }
-
 }

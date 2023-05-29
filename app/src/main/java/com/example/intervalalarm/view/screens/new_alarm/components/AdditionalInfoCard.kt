@@ -2,11 +2,8 @@ package com.example.intervalalarm.view.screens.new_alarm.components
 
 import android.app.TimePickerDialog
 import android.content.res.Configuration
-import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.*
@@ -18,19 +15,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.intervalalarm.ui.theme.IntervalAlarmTheme
-import com.example.intervalalarm.view.screens.new_alarm.NewAlarmScreen
 import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -42,12 +32,12 @@ fun AdditionalInfoCard(
     onScheduleChanged: (String) -> Unit,
     focusManager: FocusManager,
     keyboardController: SoftwareKeyboardController?,
-    isEnabled: Boolean = true
+    isEditable: Boolean = true,
+    backgroundColor: Color = MaterialTheme.colors.primary
 ) {
     val context = LocalContext.current
 
-    val newSchedule = remember { mutableStateOf("") }
-    val testFormatter = DateTimeFormatter.ofPattern("HH:mm")
+    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
     val showPastTimeDialog = remember { mutableStateOf(false) }
 
@@ -56,7 +46,7 @@ fun AdditionalInfoCard(
         context,
         { _, hour: Int, minute: Int ->
 
-            if (hour > chosenDate.hour  || (hour >= chosenDate.hour && minute > chosenDate.minute)) {
+            if (hour > chosenDate.hour || (hour >= chosenDate.hour && minute > chosenDate.minute)) {
 
                 chosenDate = LocalDateTime.of(
                     chosenDate.year,
@@ -65,7 +55,6 @@ fun AdditionalInfoCard(
                     hour,
                     minute
                 )
-                newSchedule.value = chosenDate.format(testFormatter)
                 onScheduleChanged(chosenDate.toString())
             } else {
                 showPastTimeDialog.value = true
@@ -86,6 +75,8 @@ fun AdditionalInfoCard(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
+
+        /** DESCRIPTION PICKER */
         TextField(
             modifier = Modifier
                 .clip(MaterialTheme.shapes.medium)
@@ -102,12 +93,11 @@ fun AdditionalInfoCard(
                 topEnd = CornerSize(22.dp)
             ),
             colors = TextFieldDefaults.textFieldColors(
-                backgroundColor = if (isEnabled) Color(MaterialTheme.colors.primary.value) else Color(
-                    MaterialTheme.colors.primary.copy(0.5f).value
-                ),
+                backgroundColor = backgroundColor,
+                focusedIndicatorColor = backgroundColor,
+                focusedLabelColor = backgroundColor
             ),
-//            label = { if (isEnabled) Text(text = "Description") },
-            placeholder = { if (isEnabled) Text(text = "Description") },
+            placeholder = { if (isEditable) Text(text = "Description") },
             value = description,
             onValueChange = {
                 if (it.contains("\n")) {
@@ -116,44 +106,39 @@ fun AdditionalInfoCard(
                     onDescriptionChanged(it)
                 }
             },
-            enabled = isEnabled,
-            readOnly = !isEnabled
+            enabled = isEditable,
+            readOnly = !isEditable
         )
 
+        /** SCHEDULE PICKER */
         TextField(
             modifier = Modifier
                 .clickable {
-                    if (isEnabled) {
+                    if (isEditable) {
                         timePickerDialog.show()
                     }
                 }
                 .height(50.dp)
                 .fillMaxWidth(),
             colors = TextFieldDefaults.textFieldColors(
-                backgroundColor = if (isEnabled) Color(MaterialTheme.colors.primary.value) else Color(
-                    MaterialTheme.colors.primary.copy(0.5f).value
-                ),
+                backgroundColor = backgroundColor,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 disabledIndicatorColor = Color.Transparent
             ),
             enabled = false,
-            readOnly = !isEnabled,
+            readOnly = !isEditable,
             shape = MaterialTheme.shapes.small.copy(
                 bottomStart = CornerSize(22.dp),
                 bottomEnd = CornerSize(22.dp)
             ),
             label = {
                 Text(
-                    text = if (schedule.isEmpty() && newSchedule.value.isEmpty()) {
+                    text = if (schedule.isEmpty())
+                    {
                         "Empty schedule"
                     } else {
-                        "Rings at ${
-                            newSchedule.value.ifEmpty {
-                                LocalDateTime.parse(schedule, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-                                    .format(testFormatter)
-                            }
-                        }"
+                        "Rings at " + LocalDateTime.parse(schedule, DateTimeFormatter.ISO_LOCAL_DATE_TIME).format(timeFormatter).toString()
                     }
                 )
             },
@@ -161,10 +146,9 @@ fun AdditionalInfoCard(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun lightPrev() {
+fun LightPrev() {
     IntervalAlarmTheme {
         Column(
             modifier = Modifier
@@ -175,11 +159,9 @@ fun lightPrev() {
         }
     }
 }
-
-@OptIn(ExperimentalComposeUiApi::class)
 @Preview(showBackground = true)
 @Composable
-fun darkPrev() {
+fun DarkPrev() {
     IntervalAlarmTheme {
         Column(
             modifier = Modifier

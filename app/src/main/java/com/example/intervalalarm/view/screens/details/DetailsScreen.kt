@@ -1,7 +1,6 @@
 package com.example.intervalalarm.view.screens.details
 
 import android.content.res.Configuration
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
@@ -22,10 +21,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.intervalalarm.R
-import com.example.intervalalarm.model.module.alarm_management.IntervalAlarmManager
 import com.example.intervalalarm.ui.theme.IntervalAlarmTheme
 import com.example.intervalalarm.view.screens.details.states.DetailsScreenUiState
+import com.example.intervalalarm.view.screens.home.components.IntervalFloatButton
+import com.example.intervalalarm.view.screens.home.states.AlarmStatus
 import com.example.intervalalarm.view.screens.home.states.AlarmUiState
 import com.example.intervalalarm.view.screens.new_alarm.components.*
 import com.example.intervalalarm.viewmodel.MainViewModel
@@ -40,6 +39,7 @@ fun DetailsScreen(
     currentAlarm: AlarmUiState,
     onBackPressed: () -> Unit
 ) {
+    /** UTILITIES */
     val context = LocalContext.current
 
     BackHandler(state.isEditable) { onBackPressed() }
@@ -50,8 +50,35 @@ fun DetailsScreen(
     val showDeleteDialog = remember { mutableStateOf(false) }
     val showSaveDialog = remember { mutableStateOf(false) }
     val showCancelDialog = remember { mutableStateOf(false) }
+    val showLowSecondAmountDialog = remember { mutableStateOf(false) }
 
-    val defaultTitleValue = "Alarm no. ${currentAlarm.count}"
+    val isAnyInfoChanged =
+        ((state.newTitle != currentAlarm.title) || (state.newDescription != currentAlarm.description) || ((state.newSchedule != currentAlarm.schedule) && (state.newSchedule.isNotEmpty())) || (state.detailsWheelPicker.currentHour != currentAlarm.hours) || (state.detailsWheelPicker.currentMinute != currentAlarm.minutes) || (state.detailsWheelPicker.currentSecond != currentAlarm.seconds))
+
+    val isIntervalValid =
+        (state.detailsWheelPicker.currentHour != 0) || (state.detailsWheelPicker.currentMinute != 0) || (state.detailsWheelPicker.currentSecond > 14)
+
+
+    /** COLORS */
+    val detailsUiColor = when (state.chosenAlarm.status) {
+        AlarmStatus.Enabled -> MaterialTheme.colors.primary
+        AlarmStatus.Disabled -> MaterialTheme.colors.secondaryVariant
+        AlarmStatus.Scheduled -> MaterialTheme.colors.secondaryVariant
+    }
+
+    val additionalInfoCardUiColor = if (state.isEditable) {
+        when (state.chosenAlarm.status) {
+            AlarmStatus.Enabled -> MaterialTheme.colors.primary
+            AlarmStatus.Disabled -> MaterialTheme.colors.secondaryVariant
+            AlarmStatus.Scheduled -> MaterialTheme.colors.secondaryVariant
+        }
+    } else {
+        when (state.chosenAlarm.status) {
+            AlarmStatus.Enabled -> MaterialTheme.colors.primaryVariant
+            AlarmStatus.Disabled -> MaterialTheme.colors.secondary
+            AlarmStatus.Scheduled -> MaterialTheme.colors.secondary
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -61,8 +88,7 @@ fun DetailsScreen(
 
         /** DELETE DIALOG */
         if (showDeleteDialog.value) {
-            PreventDialog(
-                context = context,
+            PreventDialog(context = context,
                 type = DialogType.DeleteAlarm,
                 hideDialog = { showDeleteDialog.value = false },
                 onCancel = { showDeleteDialog.value = false },
@@ -75,37 +101,21 @@ fun DetailsScreen(
 
         /** SAVE DIALOG */
         if (showSaveDialog.value) {
-            PreventDialog(
-                context = context,
+            PreventDialog(context = context,
                 type = DialogType.SaveEdits,
                 hideDialog = { showSaveDialog.value = false },
                 onCancel = { showSaveDialog.value = false }) {
-                if (state.chosenAlarm.schedule != state.newSchedule && state.newSchedule.isNotEmpty()) {
-                    vm.saveEditedAlarm()
-                    Log.d(
-                        "date time format",
-                        "${state.chosenAlarm.schedule} and new ${state.newSchedule}"
-                    )
-                    IntervalAlarmManager(context).setScheduledAlarm(
-                        state.chosenAlarm.title,
-                        state.chosenAlarm.description,
-                        state.newSchedule,
-                        state.chosenAlarm.hours,
-                        state.chosenAlarm.minutes,
-                        state.chosenAlarm.seconds,
-                        state.chosenAlarm.count
-                    )
-                }
-                vm.saveEditedAlarm()
+
+                vm.saveEditedAlarm(context)
                 vm.triggerEditableDetails()
                 showSaveDialog.value = false
+
             }
         }
 
         /** BACK PRESSED YET DIALOG */
         if (state.showBackPressedDialog) {
-            PreventDialog(
-                context = context,
+            PreventDialog(context = context,
                 type = DialogType.Cancel,
                 hideDialog = { vm.hideBackPressedDetailsDialog() },
                 onCancel = { vm.hideBackPressedDetailsDialog() }) {
@@ -117,14 +127,26 @@ fun DetailsScreen(
 
         /** CANCEL DIALOG */
         if (showCancelDialog.value) {
-            PreventDialog(
-                context = context,
+            PreventDialog(context = context,
                 type = DialogType.Cancel,
                 hideDialog = { showCancelDialog.value = false },
                 onCancel = { showCancelDialog.value = false }) {
                 vm.triggerEditableDetails()
                 showCancelDialog.value = false
             }
+        }
+
+        /** LOW SECONDS AMOUNT DIALOG */
+        if (showLowSecondAmountDialog.value) {
+            PreventDialog(context = context,
+                type = DialogType.LowSecondAmount,
+                hideDialog = { showLowSecondAmountDialog.value = false },
+                onCancel = {
+                    showLowSecondAmountDialog.value = false
+                    navController.popBackStack()
+                    vm.clearNewAlarm()
+                },
+                onContinue = { showLowSecondAmountDialog.value = false })
         }
 
         Column(
@@ -154,7 +176,8 @@ fun DetailsScreen(
                     defaultHour = state.chosenAlarm.hours,
                     defaultMinute = state.chosenAlarm.minutes,
                     defaultSecond = state.chosenAlarm.seconds,
-                    status = if (state.isEditable) WheelPickerStatus.Enabled else WheelPickerStatus.Disabled
+                    status = if (state.isEditable) WheelPickerStatus.Enabled else WheelPickerStatus.Disabled,
+                    highlightedNumbersColor = detailsUiColor
                 )
             }
         }
@@ -177,6 +200,13 @@ fun DetailsScreen(
                     onValueChange = { vm.updateEditedTitle(it) },
                     label = { Text(text = "Title") },
                     singleLine = true,
+                    colors = TextFieldDefaults.textFieldColors(
+                        focusedIndicatorColor = detailsUiColor,
+                        focusedLabelColor = detailsUiColor,
+
+                        unfocusedIndicatorColor = detailsUiColor,
+                        backgroundColor = detailsUiColor.copy(alpha = 0.2f)
+                    ),
                     keyboardActions = KeyboardActions(onDone = {
                         if (!focusManager.moveFocus(FocusDirection.Down)) {
                             focusManager.clearFocus()
@@ -185,13 +215,13 @@ fun DetailsScreen(
                     }),
                 )
             } else {
-                Text(text = currentAlarm.title.ifEmpty { defaultTitleValue }, fontSize = 36.sp)
+                Text(text = currentAlarm.title, fontSize = 36.sp)
             }
         }
 
         AdditionalInfoCard(
             description = if (state.isEditable) state.newDescription else if (currentAlarm.description.isEmpty()) "Empty description" else currentAlarm.description,
-            schedule = currentAlarm.schedule,
+            schedule = if (state.isEditable) state.newSchedule.ifEmpty { currentAlarm.schedule } else currentAlarm.schedule,
             onDescriptionChanged = {
                 vm.updateEditedDescription(it)
             },
@@ -200,10 +230,12 @@ fun DetailsScreen(
             },
             focusManager,
             keyboardController,
-            isEnabled = state.isEditable
+            isEditable = state.isEditable,
+            backgroundColor = additionalInfoCardUiColor
         )
     }
 
+    /** FLOAT BUTTONS */
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -212,19 +244,17 @@ fun DetailsScreen(
         horizontalAlignment = Alignment.End
     ) {
 
-        /** FLOAT BUTTON */
-        FloatingActionButton(
-            backgroundColor = MaterialTheme.colors.primary,
-            onClick = {
-                Log.d(
-                    "wheelllll",
-                    "new hour is ${state.detailsWheelPicker.currentHour} and current is ${state.chosenAlarm.hours} from UI BUTTON"
-                )
-
+        IntervalFloatButton(
+            function = {
                 if (state.isEditable) {
-                    if (state.newTitle != currentAlarm.title || state.newDescription != currentAlarm.description || state.newSchedule != currentAlarm.schedule || state.detailsWheelPicker.currentHour != currentAlarm.hours || state.detailsWheelPicker.currentMinute != currentAlarm.minutes || state.detailsWheelPicker.currentSecond != currentAlarm.seconds) {
-                        showSaveDialog.value = true
 
+                    if (isAnyInfoChanged) {
+
+                        if (isIntervalValid) {
+                            showSaveDialog.value = true
+                        } else {
+                            showLowSecondAmountDialog.value = true
+                        }
                     } else {
                         vm.triggerEditableDetails()
                     }
@@ -234,11 +264,11 @@ fun DetailsScreen(
                     vm.updateEditedDescription(currentAlarm.description)
                 }
             },
-        ) {
-            if (state.isEditable) Icon(
-                Icons.Filled.Done, contentDescription = "save alarm button"
-            ) else Icon(Icons.Filled.Edit, contentDescription = "edit alarm button")
-        }
+            isScheduled = currentAlarm.schedule.isNotEmpty(),
+            hasIcon = true,
+            icon = if (state.isEditable) Icons.Filled.Done else Icons.Filled.Edit,
+            color = detailsUiColor
+        )
     }
     Column(
         modifier = Modifier
@@ -247,11 +277,14 @@ fun DetailsScreen(
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.Start
     ) {
-        FloatingActionButton(backgroundColor = MaterialTheme.colors.primary, onClick = {
-            showDeleteDialog.value = true
-        }) {
-            Icon(Icons.Filled.Delete, contentDescription = "delete alarm button")
-        }
+
+        IntervalFloatButton(
+            function = { showDeleteDialog.value = true },
+            isScheduled = currentAlarm.schedule.isNotEmpty(),
+            hasIcon = true,
+            icon = Icons.Filled.Delete,
+            color = detailsUiColor
+        )
     }
 }
 
@@ -263,7 +296,7 @@ fun DefaultPreview2() {
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-//            DetailsScreen(vm = viewModel(), navController = rememberNavController(), alarmCount = 1, )
+
         }
     }
 }

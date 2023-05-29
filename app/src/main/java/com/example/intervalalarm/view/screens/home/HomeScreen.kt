@@ -1,7 +1,10 @@
 package com.example.intervalalarm.view.screens.home
 
-import android.os.CountDownTimer
-import android.util.Log
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
@@ -14,13 +17,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.checkSelfPermission
+import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavController
-import com.example.intervalalarm.model.module.timer.CurrentAlarmTimer
-import com.example.intervalalarm.view.screens.home.components.AddNewAlarmButton
 import com.example.intervalalarm.view.screens.home.components.AlarmList
-import com.example.intervalalarm.view.screens.home.states.AlarmStatus
+import com.example.intervalalarm.view.screens.home.components.IntervalFloatButton
 import com.example.intervalalarm.view.screens.home.states.HomeScreenUiState
 import com.example.intervalalarm.view.screens.navigation.Screens
 import com.example.intervalalarm.view.screens.new_alarm.components.DialogType
@@ -29,7 +33,8 @@ import com.example.intervalalarm.viewmodel.MainViewModel
 
 @Composable
 fun HomeScreen(
-    vm: MainViewModel, navController: NavController, state: HomeScreenUiState
+    vm: MainViewModel, navController: NavController,
+    state: HomeScreenUiState,
 ) {
     val context = LocalContext.current
 
@@ -40,12 +45,39 @@ fun HomeScreen(
     val isFolded = remember { derivedStateOf { listState.firstVisibleItemIndex > 1 } }
 
     val formattedInterval: String = when {
-        (state.upcomingAlarm.hours > 0) -> "${state.upcomingAlarm.hours}:${state.upcomingAlarm.minutes}:${state.upcomingAlarm.seconds}"
-        (state.upcomingAlarm.hours == 0 && state.upcomingAlarm.minutes > 0) -> "${state.upcomingAlarm.minutes}:${state.upcomingAlarm.seconds}"
+        (state.upcomingAlarm.hours > 0) -> "${state.upcomingAlarm.hours}h:${state.upcomingAlarm.minutes}m:${state.upcomingAlarm.seconds}s"
+        (state.upcomingAlarm.hours == 0 && state.upcomingAlarm.minutes > 0) -> "${state.upcomingAlarm.minutes}m:${state.upcomingAlarm.seconds}s"
         else -> {
-            "${state.upcomingAlarm.seconds}"
+            "${state.upcomingAlarm.seconds}s"
         }
     }
+
+    val isPermissionGranted =
+        if (Build.VERSION.SDK_INT >= 33) {
+
+            checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+                    && checkSelfPermission(
+                context,
+                Manifest.permission.SCHEDULE_EXACT_ALARM
+            ) == PackageManager.PERMISSION_GRANTED
+
+        } else if (Build.VERSION.SDK_INT >= 31) {
+            checkSelfPermission(
+                context,
+                Manifest.permission.SCHEDULE_EXACT_ALARM
+            ) == PackageManager.PERMISSION_GRANTED
+
+        } else {
+            true
+        }
+
+    val showPermissionDialog = remember {
+        mutableStateOf(false)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -63,23 +95,20 @@ fun HomeScreen(
             AnimatedVisibility(
                 visible = !isFolded.value, enter = slideInVertically()
             ) {
-                Text(text = if (enabledList.isNotEmpty()) {
-                    if (upcomingAlarm.title.isNotEmpty()) {
-                        upcomingAlarm.title
+                Text(
+                    text = if (enabledList.isNotEmpty()) {
+                        "${upcomingAlarm.title} is incoming"
                     } else {
-                        "Alarm no. ${upcomingAlarm.count}"
-                    } + " is incoming"
-
-                } else {
-                    "No incoming alarms"
-                },
+                        "No incoming alarms"
+                    },
                     fontSize = (if (!isFolded.value) 40.sp else 28.sp),
+                    textAlign = TextAlign.Center,
                     modifier = Modifier
                         .padding(vertical = 20.dp)
                         .clickable { vm.deleteAllAlarms(context) })
             }
 
-            Text(text = if (enabledList.isNotEmpty()) "Interval is " + formattedInterval else "",
+            Text(text = if (enabledList.isNotEmpty()) "Interval is $formattedInterval" else "",
                 fontSize = 28.sp,
                 modifier = Modifier
                     .padding(vertical = 12.dp)
@@ -92,7 +121,13 @@ fun HomeScreen(
             state.allAlarms.find { certainAlarm ->
                 certainAlarm.id == it
             }?.let { alarmState ->
-                vm.triggerAlarm(context = context, alarmState)
+                vm.triggerAlarm(context = context, alarmState, infoToast = {
+                    Toast.makeText(
+                        context,
+                        "Schedule cleared!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                })
             }
         }
     }
@@ -105,9 +140,28 @@ fun HomeScreen(
         horizontalAlignment = Alignment.End
     ) {
 
-        AddNewAlarmButton(
-            addNew = {
-                navController.navigate(Screens.NewAlarmScreen.route)
+        if (showPermissionDialog.value) {
+            PreventDialog(
+                context = context,
+                type = DialogType.PermissionRequired,
+                hideDialog = { showPermissionDialog.value = false },
+                onCancel = { showPermissionDialog.value = false }) {
+                val intent = Intent()
+                intent.action = "android.settings.APP_NOTIFICATION_SETTINGS"
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                intent.putExtra("android.provider.extra.APP_PACKAGE", context.packageName)
+                startActivity(context, intent, null)
+                showPermissionDialog.value = false
+            }
+        }
+
+        IntervalFloatButton(
+            function = {
+                if (isPermissionGranted) {
+                    navController.navigate(Screens.NewAlarmScreen.route)
+                } else {
+                    showPermissionDialog.value = true
+                }
             }, hasIcon = true, isScheduled = false
         )
     }

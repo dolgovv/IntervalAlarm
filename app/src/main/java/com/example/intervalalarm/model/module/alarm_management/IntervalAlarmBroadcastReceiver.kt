@@ -1,17 +1,32 @@
 package com.example.intervalalarm.model.module.alarm_management
 
 import android.app.AlarmManager
-import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.ACTION_BOOT_COMPLETED
 import android.util.Log
+import com.example.intervalalarm.model.database.AlarmsDAO
 import com.example.intervalalarm.model.module.notifications.AlarmNotificationService
-import com.example.intervalalarm.viewmodel.MainViewModel
-import java.util.Calendar
+import com.example.intervalalarm.model.module.notifications.NotificationType
+import com.example.intervalalarm.model.repository.AlarmsRepository
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class IntervalAlarmBroadcastReceiver : BroadcastReceiver() {
+
+    @Inject
+    lateinit var repository: AlarmsRepository
+
+    @Inject
+    lateinit var dao: AlarmsDAO
+
     override fun onReceive(context: Context, intent: Intent) {
+
         val title = intent.getStringExtra("title")
         val description = intent.getStringExtra("description")
         val schedule = intent.getStringExtra("schedule")
@@ -21,32 +36,48 @@ class IntervalAlarmBroadcastReceiver : BroadcastReceiver() {
         val seconds = intent.getIntExtra("seconds", 11)
 
         val notificationService = AlarmNotificationService(context)
-        Log.d("problem resolve", "from receiver seconds are ${seconds}")
-        Log.d("problem resolve", "from receiver schedule are ${schedule}")
-        Log.d("problem resolve", "from receiver title are ${title}")
-        Log.d("problem resolve", "from receiver description are ${description}")
         val formattedInterval: String =
             if (hours > 0 && minutes > 0) "$hours" + "h:" + "$minutes" + "m:" + "$seconds" + "s" else if (minutes > 0) "$minutes" + "m:" + "$seconds" + "s" else "$seconds" + "s"
 
+        if (schedule != null) {
+            if (schedule.isNotEmpty()) {
 
-        /**
-         *
-         *
-         * */
+                runBlocking(Dispatchers.Default) {
+                    dao.triggerStatusByCount(count, true)
+                    Log.d("trigger scheduled", "ran block")
+                }
+            }
+        }
+
         if (title != null && description != null) {
-            if (schedule == null) {
-                notificationService.showNotification("Alarm $count", "", count, formattedInterval)
+
+            if (description.isEmpty()) {
+
+                notificationService.showNotification(
+                    type = NotificationType.RingAlarm,
+                    title,
+                    "No description",
+                    count,
+                    formattedInterval
+                )
 
                 IntervalAlarmManager(context = context).setAlarm(
                     title = title,
-                    description = description,
+                    description = "No description",
                     hours = hours,
                     minutes = minutes,
                     seconds = seconds,
                     curCount = count
                 )
             } else {
-                notificationService.showNotification(title, description, count, formattedInterval)
+
+                notificationService.showNotification(
+                    type = NotificationType.RingAlarm,
+                    title,
+                    description,
+                    count,
+                    formattedInterval
+                )
 
                 IntervalAlarmManager(context = context).setAlarm(
                     title = title,
@@ -59,72 +90,30 @@ class IntervalAlarmBroadcastReceiver : BroadcastReceiver() {
             }
         }
 
-//        if (title != null && description != null) {
-//
-//            if (schedule == null) {
-//                notificationService.showNotification("Alarm $count", "", count, formattedInterval)
-//
-//                IntervalAlarmManager(context = context).setAlarm(
-//                    title = title,
-//                    description = description,
-//                    hours = hours,
-//                    minutes = minutes,
-//                    seconds = seconds,
-//                    curCount = count
-//                )
-//            } else {
-//                notificationService.showNotification(title, description, count, formattedInterval)
-//
-//                IntervalAlarmManager(context = context).setAlarm(
-//                    title = title,
-//                    description = description,
-//                    hours = hours,
-//                    minutes = minutes,
-//                    seconds = seconds,
-//                    curCount = count
-//                )
-//            }
+        when (intent.action) {
+            AlarmManager.ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED -> {
 
-//        } else {
-//            if (schedule == null) {
-//                notificationService.showNotification("Alarm $count", "", count, formattedInterval)
-//
-//                IntervalAlarmManager(context = context).setAlarm(
-//                    title = "Alarm $count xdtcfvghbjhnjkmlk",
-//                    description = "",
-//                    hours = hours,
-//                    minutes = minutes,
-//                    seconds = seconds,
-//                    curCount = count
-//                )
-//            } else {
-//                notificationService.showNotification("Alarm $count", "", count, formattedInterval)
-//
-//                IntervalAlarmManager(context = context).setAlarm(
-//                    title = "Alarm $count",
-//                    description = "",
-//                    hours = hours,
-//                    minutes = minutes,
-//                    seconds = seconds,
-//                    curCount = count
-//                )
-//            }
-//            Log.d("scheduled alarm maintenance", "title or description == null")
-//        }
+                Log.d("ersdtrfghjklm", "schedule perm triggered")
+            }
 
+            ACTION_BOOT_COMPLETED -> {
+                runBlocking(Dispatchers.Default) {
 
-        if (Intent.ACTION_BOOT_COMPLETED == intent.action) {
+                    dao.disableAll()
 
+                    launch {
+                        notificationService.showNotification(
+                            type = NotificationType.RebootNotification,
+                            null, null, null, null
+                        )
+                    }
+                }
+            }
+        }
 
-//            IntervalAlarmManager(context = context).cancelAlarm(
-//                PendingIntent.getBroadcast(
-//                    context, count, intent,
-//                    PendingIntent.FLAG_IMMUTABLE
-//                )
-//            )
-//            IntervalAlarmManager(context = context).setAlarm(title, description, hours, minutes, seconds, count)
-        } else {
-            Log.d("alarm management", "")
+        if (AlarmManager.ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED == intent.action) {
+
+            Log.d("ersdtrfghjklm", "schedule perm triggered")
         }
     }
 }

@@ -1,33 +1,29 @@
 package com.example.intervalalarm.viewmodel
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.media.AudioAttributes
-import android.net.Uri
+import android.content.pm.PackageManager
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.intervalalarm.R
 import com.example.intervalalarm.model.database.AlarmEntity
 import com.example.intervalalarm.model.module.alarm_management.IntervalAlarmBroadcastReceiver
 import com.example.intervalalarm.model.module.alarm_management.IntervalAlarmManager
-import com.example.intervalalarm.model.module.notifications.AlarmNotificationService
-import com.example.intervalalarm.model.module.timer.CurrentAlarmTimer
 import com.example.intervalalarm.model.repository.AlarmsRepository
 import com.example.intervalalarm.view.screens.details.states.DetailsScreenUiState
 import com.example.intervalalarm.view.screens.home.states.AlarmStatus
 import com.example.intervalalarm.view.screens.home.states.AlarmUiState
 import com.example.intervalalarm.view.screens.home.states.HomeScreenUiState
-import com.example.intervalalarm.view.screens.new_alarm.states.NewDayScreenUiState
+import com.example.intervalalarm.view.screens.new_alarm.states.AddNewScreenUiState
 import com.example.intervalalarm.view.screens.new_alarm.states.WheelPickerUiState
 import com.example.intervalalarm.viewmodel.use_cases.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @HiltViewModel
@@ -45,29 +41,7 @@ class MainViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             updateList()
-        }
-    }
-
-    /** EXPERIMENTAL onBackPressed HANDLING */
-    fun showBackPressedDetailsDialog() = viewModelScope.launch {
-        _detailsScreenUiState.update {
-            it.copy(showBackPressedDialog = true)
-        }
-    }
-    fun hideBackPressedDetailsDialog() = viewModelScope.launch {
-        _detailsScreenUiState.update {
-            it.copy(showBackPressedDialog = false)
-        }
-    }
-
-    fun showBackPressedNewAlarmDialog() = viewModelScope.launch {
-        _addNewAlarmUiState.update {
-            it.copy(showBackPressedDialog = true)
-        }
-    }
-    fun hideBackPressedNewAlarmDialog() = viewModelScope.launch {
-        _addNewAlarmUiState.update {
-            it.copy(showBackPressedDialog    = false)
+//            TODO("start all the alarms if not active yet (should be active actually)")
         }
     }
 
@@ -76,54 +50,53 @@ class MainViewModel @Inject constructor(
     private val _homeScreenUiState = MutableStateFlow(HomeScreenUiState())
     val homeScreenUiState: StateFlow<HomeScreenUiState> = _homeScreenUiState.asStateFlow()
 
-    fun addNewAlarm(context: Context, newAlarm: AlarmEntity) = viewModelScope.launch {
-        addNewAlarmUseCase(newAlarm)
-        setIntervalAlarm(
-            context,
-            newAlarm.title,
-            newAlarm.description,
-            newAlarm.hours,
-            newAlarm.minutes,
-            newAlarm.seconds,
-            newAlarm.alarmCount,
-            newAlarm.schedule,
-        )
-        Log.d("problem resolve", newAlarm.title)
-        updateList()
-    }
-
     fun triggerAlarm(
-        context: Context, alarm: AlarmUiState
+        context: Context, alarm: AlarmUiState, infoToast: () -> Unit
     ) {
         viewModelScope.launch {
-            triggerAlarmStatusUseCase(context, alarm)
+            if (context.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+                triggerAlarmStatusUseCase(context, alarm)
+            } else {
+                Toast.makeText(
+                    context,
+                    "Notification permission is not provided!",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
             clearSchedule(alarm.id)
-            updateList()
+            if (alarm.status == AlarmStatus.Scheduled) {
+                infoToast()
+            }
+            Log.d("trigger scheduled", "triggered ${alarm.status}")
         }
     }
 
     private fun setIntervalAlarm(
         context: Context,
-        title: String,
-        description: String,
-        hours: Int,
-        minutes: Int,
-        seconds: Int,
-        count: Int,
-        schedule: String
+        alarm: AlarmUiState
     ) {
 
-        val totalTitle = title.ifEmpty { "Alarm $count" }
-        val totalDescription = description.ifEmpty { "" }
-
-        if (schedule.isEmpty()) {
+        if (alarm.schedule.isEmpty()) {
             IntervalAlarmManager(context).setAlarm(
-                totalTitle, totalDescription, count, hours, minutes, seconds
+                alarm.title,
+                alarm.description,
+                alarm.count,
+                alarm.hours,
+                alarm.minutes,
+                alarm.seconds
             )
         } else {
-            IntervalAlarmManager(context).setScheduledAlarm(
-                totalTitle, totalDescription, schedule, hours, minutes, seconds, count
-            )
+            viewModelScope.launch {
+                IntervalAlarmManager(context).setScheduledAlarm(
+                    alarm.title,
+                    alarm.description,
+                    alarm.schedule,
+                    alarm.count,
+                    alarm.hours,
+                    alarm.minutes,
+                    alarm.seconds
+                )
+            }
         }
     }
 
@@ -136,7 +109,11 @@ class MainViewModel @Inject constructor(
             _homeScreenUiState.update { currentState ->
                 currentState.copy(
                     allAlarms = getAllAlarms(alarms),
-                    enabledAlarms = getEnabledAlarms(alarms),
+                    enabledAlarms = getEnabledAlarms(alarms)
+                )
+            }
+            _homeScreenUiState.update {
+                it.copy(
                     upcomingAlarm = getUpcomingAlarm(_homeScreenUiState.value)
                 )
             }
@@ -148,16 +125,16 @@ class MainViewModel @Inject constructor(
     }
 
     private fun getEnabledAlarms(alarms: List<AlarmEntity>): List<AlarmUiState> {
-        return alarms.filter { it.isActive }.map { it.toUiState() }
+        return if (alarms.none { it.isActive }) alarms.filter { it.schedule.isNotEmpty() }
+            .map { it.toUiState() } else alarms.filter { it.isActive }.map { it.toUiState() }
     }
 
     private fun getUpcomingAlarm(state: HomeScreenUiState): AlarmUiState {
+
         return if (state.enabledAlarms.isNotEmpty()) {
             state.enabledAlarms.minByOrNull {
-                it.seconds * 1000
-                + it.minutes * 1000 * 60
-                + it.hours * 1000 * 60 * 60
-                }!!
+                (it.seconds * 1000) + (it.minutes * 1000 * 60) + (it.hours * 1000 * 60 * 60)
+            }!!
         } else {
             AlarmUiState()
         }
@@ -170,22 +147,30 @@ class MainViewModel @Inject constructor(
     fun triggerEditableDetails() {
         viewModelScope.launch {
             _detailsScreenUiState.update {
-                it.copy(isEditable = !it.isEditable)
+                it.copy(isEditable = !it.isEditable, newSchedule = "", newDescription = "")
             }
         }
     }
 
     fun deleteAlarm(context: Context, alarm: AlarmUiState) = viewModelScope.launch {
         deleteAlarmUseCase(context, alarm = alarm.toEntity())
-        updateList()
-        Log.d(
-            "big problem resolve", "${_homeScreenUiState.value.allAlarms.size}"
-        )
     }
 
-    fun saveEditedAlarm() = viewModelScope.launch {
+    fun saveEditedAlarm(context: Context) {
+
+        val intent = Intent(context, IntervalAlarmBroadcastReceiver::class.java)
+        val pI = PendingIntent.getBroadcast(
+            context, detailsScreenUiState.value.chosenAlarm.count, intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
 
         val id = detailsScreenUiState.value.chosenAlarm.id
+
+        val newTitle = _detailsScreenUiState.asStateFlow().value.newTitle
+        val newDescription = _detailsScreenUiState.asStateFlow().value.newDescription
+        val newSchedule = _detailsScreenUiState.asStateFlow().value.newSchedule
+
+        val wheelState = _detailsScreenUiState.asStateFlow().value.detailsWheelPicker
 
         val isTitleNew =
             detailsScreenUiState.value.chosenAlarm.title != detailsScreenUiState.value.newTitle
@@ -194,7 +179,7 @@ class MainViewModel @Inject constructor(
             detailsScreenUiState.value.chosenAlarm.description != detailsScreenUiState.value.newDescription
 
         val isScheduleNew =
-            detailsScreenUiState.value.chosenAlarm.schedule != detailsScreenUiState.value.newSchedule
+            (detailsScreenUiState.value.chosenAlarm.schedule != detailsScreenUiState.value.newSchedule) && (detailsScreenUiState.value.newSchedule.isNotEmpty())
 
         val isHourNew =
             detailsScreenUiState.value.detailsWheelPicker.currentHour != detailsScreenUiState.value.chosenAlarm.hours
@@ -205,45 +190,107 @@ class MainViewModel @Inject constructor(
         val isSecondNew =
             detailsScreenUiState.value.detailsWheelPicker.currentSecond != detailsScreenUiState.value.chosenAlarm.seconds
 
-        if (isTitleNew) {
-            saveTitleUseCase(
-                id, title = detailsScreenUiState.value.newTitle
-            )
-        }
 
-        if (isDescriptionNew) {
-            saveDescriptionUseCase(
-                id, description = detailsScreenUiState.value.newDescription
-            )
-        }
+        runBlocking {
 
-        if (isScheduleNew) {
-            saveScheduleUseCase(
-                id, newSchedule = detailsScreenUiState.value.newSchedule
-            )
-            Log.d("date time format", "saved from vm. now is ${detailsScreenUiState.value.chosenAlarm.schedule}")
-        }
+            if (isTitleNew) {
+                launch {
 
-        if (isHourNew) {
-            saveDetailsHour(
-                id, detailsScreenUiState.value.detailsWheelPicker.currentHour
-            )
-        }
+                    IntervalAlarmManager(context).cancelAlarm(pI)
+                    saveTitleUseCase(
+                        id, title = newTitle
+                    )
+                    setIntervalAlarm(
+                        context,
+                        alarm = detailsScreenUiState.value.chosenAlarm.copy(title = newTitle)
+                    )
+                }.join()
+            }
 
-        if (isMinuteNew) {
-            saveDetailsMinute(
-                id, detailsScreenUiState.value.detailsWheelPicker.currentMinute
-            )
-        }
+            if (isDescriptionNew) {
+                launch {
 
-        if (isSecondNew) {
-            saveDetailsSecond(
-                id, detailsScreenUiState.value.detailsWheelPicker.currentSecond
-            )
+                    saveDescriptionUseCase(
+                        id, description = newDescription
+                    )
+                    IntervalAlarmManager(context).cancelAlarm(pI)
+                    setIntervalAlarm(
+                        context,
+                        alarm = detailsScreenUiState.value.chosenAlarm.copy(description = newDescription)
+                    )
+                }.join()
+            }
+
+            if (isScheduleNew) {
+                launch {
+
+                    if (detailsScreenUiState.value.chosenAlarm.status == AlarmStatus.Enabled) {
+                        triggerAlarmStatusUseCase(
+                            context,
+                            alarm = detailsScreenUiState.value.chosenAlarm
+                        )
+                    }
+                    IntervalAlarmManager(context).cancelAlarm(pI)
+                    saveScheduleUseCase(id, newSchedule = newSchedule)
+                    setIntervalAlarm(
+                        context,
+                        alarm = detailsScreenUiState.value.chosenAlarm.copy(schedule = newSchedule)
+                    )
+                    _detailsScreenUiState.update { detScreenState ->
+                        detScreenState.copy(
+                            chosenAlarm = detScreenState.chosenAlarm.copy(status = AlarmStatus.Scheduled)
+                        )
+                    }
+
+                }.join()
+            }
+
+            if (isHourNew) {
+                launch {
+
+                    IntervalAlarmManager(context).cancelAlarm(pI)
+                    saveDetailsHour(
+                        id, wheelState.currentHour
+                    )
+                    setIntervalAlarm(
+                        context,
+                        alarm = detailsScreenUiState.value.chosenAlarm.copy(hours = detailsScreenUiState.value.detailsWheelPicker.currentHour)
+                    )
+                }.join()
+            }
+
+            if (isMinuteNew) {
+                launch {
+
+                    IntervalAlarmManager(context).cancelAlarm(pI)
+                    saveDetailsMinute(
+                        id, wheelState.currentMinute
+                    )
+                    setIntervalAlarm(
+                        context,
+                        alarm = detailsScreenUiState.value.chosenAlarm.copy(minutes = detailsScreenUiState.value.detailsWheelPicker.currentMinute)
+                    )
+                }.join()
+            }
+
+            if (isSecondNew) {
+                launch {
+
+                    IntervalAlarmManager(context).cancelAlarm(pI)
+                    saveDetailsSecond(
+                        id, wheelState.currentSecond
+                    )
+                    setIntervalAlarm(
+                        context,
+                        alarm = detailsScreenUiState.value.chosenAlarm.copy(seconds = detailsScreenUiState.value.detailsWheelPicker.currentSecond)
+                    )
+                }.join()
+            }
         }
     }
 
-    //HOURS
+    // WHEEL
+
     fun updateDetailsWheelStateHour(hour: Int) = viewModelScope.launch {
         updateWheelHour(hour)
         _detailsScreenUiState.update { it.copy(detailsWheelPicker = _wheelUiState.value) }
@@ -253,7 +300,6 @@ class MainViewModel @Inject constructor(
         repository.saveHour(id = id, newHour = newHour)
     }
 
-    //MINUTES
     fun updateDetailsWheelStateMinute(minute: Int) = viewModelScope.launch {
         updateWheelMinute(minute)
         _detailsScreenUiState.update { it.copy(detailsWheelPicker = wheelUiState.value) }
@@ -263,7 +309,6 @@ class MainViewModel @Inject constructor(
         repository.saveMinute(id = id, newMinute = newMinute)
     }
 
-    //SECONDS
     fun updateDetailsWheelStateSecond(second: Int) = viewModelScope.launch {
         updateWheelSecond(second)
         _detailsScreenUiState.update {
@@ -325,6 +370,85 @@ class MainViewModel @Inject constructor(
         updateList()
     }
 
+    fun showBackPressedDetailsDialog() = viewModelScope.launch {
+        _detailsScreenUiState.update {
+            it.copy(showBackPressedDialog = true)
+        }
+    }
+
+    fun hideBackPressedDetailsDialog() = viewModelScope.launch {
+        _detailsScreenUiState.update {
+            it.copy(showBackPressedDialog = false)
+        }
+    }
+
+    fun showBackPressedNewAlarmDialog() = viewModelScope.launch {
+        _addNewAlarmUiState.update {
+            it.copy(showBackPressedDialog = true)
+        }
+    }
+
+    /** NEW ALARM SCREEN */
+    private val _addNewAlarmUiState = MutableStateFlow(AddNewScreenUiState())
+    val addNewAlarmUiState = _addNewAlarmUiState.asStateFlow()
+
+    fun addNewAlarm(context: Context, newAlarm: AlarmEntity) = viewModelScope.launch {
+        addNewAlarmUseCase(newAlarm)
+        setIntervalAlarm(
+            context,
+            alarm = newAlarm.toUiState()
+        )
+    }
+
+    // WHEEL
+    fun updateNewHour(hour: Int) = viewModelScope.launch {
+        updateWheelHour(hour)
+        _addNewAlarmUiState.update {
+            it.copy(wheelPickerState = _wheelUiState.value)
+        }
+    }
+
+    fun updateNewMinute(minute: Int) = viewModelScope.launch {
+        updateWheelMinute(minute)
+        _addNewAlarmUiState.update {
+            it.copy(wheelPickerState = _wheelUiState.value)
+        }
+    }
+
+    fun updateNewSecond(second: Int) = viewModelScope.launch {
+        updateWheelSecond(second)
+        _addNewAlarmUiState.update {
+            it.copy(wheelPickerState = _wheelUiState.value)
+        }
+    }
+
+    // UTILITIES
+    fun clearNewAlarm() = viewModelScope.launch {
+        _addNewAlarmUiState.update {
+            it.copy(
+                description = "", title = "", schedule = "", wheelPickerState = WheelPickerUiState()
+            )
+        }
+    }
+
+    fun hideBackPressedNewAlarmDialog() = viewModelScope.launch {
+        _addNewAlarmUiState.update {
+            it.copy(showBackPressedDialog = false)
+        }
+    }
+
+    fun updateDescription(description: String) = viewModelScope.launch {
+        _addNewAlarmUiState.update {
+            it.copy(description = description)
+        }
+    }
+
+    fun updateSchedule(schedule: String) = viewModelScope.launch {
+        _addNewAlarmUiState.update {
+            it.copy(schedule = schedule)
+        }
+    }
+
     /** WHEEL PICKER HANDLER */
     private val _wheelUiState = MutableStateFlow(WheelPickerUiState())
     private val wheelUiState = _wheelUiState.asStateFlow()
@@ -347,52 +471,4 @@ class MainViewModel @Inject constructor(
         }
     }
 
-
-    /** NEW ALARM SCREEN */
-    private val _addNewAlarmUiState = MutableStateFlow(NewDayScreenUiState())
-    val addNewAlarmUiState = _addNewAlarmUiState.asStateFlow()
-
-    fun clearNewAlarm() = viewModelScope.launch {
-        _addNewAlarmUiState.update {
-            it.copy(
-                description = "", title = "", schedule = "", wheelPickerState = WheelPickerUiState()
-            )
-        }
-    }
-
-    fun updateDescription(description: String) = viewModelScope.launch {
-        _addNewAlarmUiState.update {
-            it.copy(description = description)
-        }
-    }
-
-    fun updateSchedule(schedule: String) = viewModelScope.launch {
-        _addNewAlarmUiState.update {
-            it.copy(schedule = schedule)
-        }
-        Log.d(
-            "scheduled alarm maintenance", "schedule updated"
-        )
-    }
-
-    fun updateNewHour(hour: Int) = viewModelScope.launch {
-        updateWheelHour(hour)
-        _addNewAlarmUiState.update {
-            it.copy(wheelPickerState = _wheelUiState.value)
-        }
-    }
-
-    fun updateNewMinute(minute: Int) = viewModelScope.launch {
-        updateWheelMinute(minute)
-        _addNewAlarmUiState.update {
-            it.copy(wheelPickerState = _wheelUiState.value)
-        }
-    }
-
-    fun updateNewSecond(second: Int) = viewModelScope.launch {
-        updateWheelSecond(second)
-        _addNewAlarmUiState.update {
-            it.copy(wheelPickerState = _wheelUiState.value)
-        }
-    }
 }

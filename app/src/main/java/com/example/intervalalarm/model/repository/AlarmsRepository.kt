@@ -1,28 +1,18 @@
 package com.example.intervalalarm.model.repository
 
-import android.util.Log
 import androidx.annotation.WorkerThread
 import com.example.intervalalarm.model.database.AlarmEntity
 import com.example.intervalalarm.model.database.AlarmsDAO
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.withContext
 
 class AlarmsRepository(private val dao: AlarmsDAO) {
 
     val allAlarms: Flow<List<AlarmEntity>> = dao.getAlarmsCounted()
-    val enabledAlarms: Flow<List<AlarmEntity>> = dao.getEnabledAlarms()
 
     /** HOME SCREEN */
     @WorkerThread
-    suspend fun triggerStatus(id: String, status: Boolean) = withContext(Dispatchers.IO) {
+    suspend fun triggerStatus(id: String, status: Boolean) {
         dao.triggerStatus(id, status)
-    }
-
-    @WorkerThread
-    suspend fun deleteAll() {
-        dao.deleteAll()
     }
 
     /** NEW ALARM SCREEN */

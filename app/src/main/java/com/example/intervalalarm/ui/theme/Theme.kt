@@ -8,15 +8,23 @@ import androidx.compose.runtime.Composable
 import com.example.intervalalarm.view.theme.*
 
 private val DarkColorPalette = darkColors(
-    primary = DarkThemeMain,
-    primaryVariant = DarkThemeSecondary,
-    secondary = DarkThemeAccent
+    primary = DarkThemePrimary,
+    primaryVariant = DarkThemePrimaryVariant,
+    onPrimary = DarkThemeOnPrimary,
+
+    secondary = DarkThemeSecondary,
+    secondaryVariant = DarkThemeSecondaryVariant,
+    onSecondary = DarkThemeOnSecondary,
 )
 
 private val LightColorPalette = lightColors(
-    primary = LightThemeMain,
-    primaryVariant = LightThemeSecondary,
-    secondary = LightThemeAccent
+    primary = LightThemePrimary,
+    primaryVariant = LightThemePrimaryVariant,
+    onPrimary = LightThemeOnPrimary,
+
+    secondary = LightThemeSecondary,
+    secondaryVariant = LightThemeSecondaryVariant,
+    onSecondary = LightThemeOnSecondary,
 
     /* Other default colors to override
     background = Color.White,

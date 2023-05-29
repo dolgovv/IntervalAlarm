@@ -16,7 +16,7 @@ class DeleteAlarmUseCase @Inject constructor(private val repository: AlarmsRepos
         val intent = Intent(context, IntervalAlarmBroadcastReceiver::class.java)
         val pendingIntent = PendingIntent.getBroadcast(
             context, alarm.alarmCount, intent,
-            PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
         IntervalAlarmManager(context).cancelAlarm(pendingIntent)
     }

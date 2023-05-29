@@ -1,17 +1,15 @@
 package com.example.intervalalarm.view.screens.navigation
 
-import android.os.CountDownTimer
-import android.util.Log
 import androidx.compose.runtime.*
-import androidx.navigation.*
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.intervalalarm.model.module.timer.CurrentAlarmTimer
+import androidx.navigation.navArgument
 import com.example.intervalalarm.view.screens.details.DetailsScreen
 import com.example.intervalalarm.view.screens.home.HomeScreen
 import com.example.intervalalarm.view.screens.new_alarm.NewAlarmScreen
 import com.example.intervalalarm.viewmodel.MainViewModel
-
 
 @Composable
 fun NavScreens(
@@ -23,6 +21,7 @@ fun NavScreens(
     val homeState by vm.homeScreenUiState.collectAsState()
     val detailsState by vm.detailsScreenUiState.collectAsState()
     val addNewState by vm.addNewAlarmUiState.collectAsState()
+
 
     NavHost(
         navController = navController,
@@ -41,10 +40,26 @@ fun NavScreens(
 
         /** ADD NEW SCREEN */
         composable(route = Screens.NewAlarmScreen.route) {
+
             NewAlarmScreen(
+                state = addNewState,
+                list = homeState.allAlarms,
                 vm = vm,
                 navController = navController,
-                onBackPressed = { vm.showBackPressedNewAlarmDialog() }
+                onBackPressed = {
+                    if (
+                        addNewState.title.isNotEmpty()
+                        || addNewState.description.isNotEmpty()
+                        || addNewState.wheelPickerState.currentHour != 0
+                        || addNewState.wheelPickerState.currentMinute != 0
+                        || addNewState.wheelPickerState.currentSecond != 0
+                        || addNewState.schedule.isNotEmpty()
+                    ) {
+                        vm.showBackPressedNewAlarmDialog()
+                    } else {
+                        navController.popBackStack()
+                    }
+                }
             )
         }
 
@@ -64,8 +79,5 @@ fun NavScreens(
                 onBackPressed = { vm.showBackPressedDetailsDialog() })
         }
     }
-
-    autoNavigateTo?.let {
-        navController.navigate(route = Screens.DetailsScreen.withArgs(it))
-    }
+    autoNavigateTo?.let { navController.navigate(route = Screens.DetailsScreen.withArgs(it)) }
 }

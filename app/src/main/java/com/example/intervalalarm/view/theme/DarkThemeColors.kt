@@ -2,7 +2,10 @@ package com.example.intervalalarm.view.theme
 
 import androidx.compose.ui.graphics.Color
 
-val DarkThemeMain = Color(0xFFBD4D4D)
+val DarkThemePrimary = Color(0xFFBD4D4D)
+val DarkThemePrimaryVariant = Color(0xFF853838)
+val DarkThemeOnPrimary = Color(0xFFEED9D9)
+
 val DarkThemeSecondary = Color(0xFF4F4C64)
-val DarkThemeAccent = Color(0xFFC4C1E4)
-val DarkThemeSecondaryAccent = Color(0xFFC4C1E4)
+val DarkThemeSecondaryVariant = Color(0xFF666283)
+val DarkThemeOnSecondary = Color(0xFFB3B0C2)

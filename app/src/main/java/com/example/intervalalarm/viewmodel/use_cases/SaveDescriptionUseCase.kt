@@ -1,6 +1,5 @@
 package com.example.intervalalarm.viewmodel.use_cases
 
-import android.util.Log
 import com.example.intervalalarm.model.repository.AlarmsRepository
 import javax.inject.Inject
 

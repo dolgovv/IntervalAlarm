@@ -1,6 +1,5 @@
 package com.example.intervalalarm.model.database
 
-import android.accounts.AuthenticatorDescription
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 
@@ -16,7 +15,10 @@ interface AlarmsDAO {
 
     /** HOME SCREEN */
     @Query("UPDATE alarms_table SET isActive=:status WHERE id = :id")
-    fun triggerStatus(id: String, status: Boolean)
+    suspend fun triggerStatus(id: String, status: Boolean)
+
+    @Query("UPDATE alarms_table SET isActive=:status WHERE alarmCount = :count")
+    suspend fun triggerStatusByCount(count: Int, status: Boolean)
 
     @Query("DELETE FROM alarms_table")
     suspend fun deleteAll()
@@ -37,6 +39,8 @@ interface AlarmsDAO {
 
     @Query("UPDATE alarms_table SET schedule =:schedule WHERE id = :id")
     suspend fun updateSchedule(id: String, schedule: String)
+//    @Query("UPDATE alarms_table SET isActive =:isActive WHERE id = :id")
+//    suspend fun changeStatus(id: String, isActive: Boolean)
 
     @Query("UPDATE alarms_table SET schedule = :blankSchedule WHERE id = :id")
     suspend fun clearSchedule(id: String, blankSchedule: String = "")
@@ -49,4 +53,10 @@ interface AlarmsDAO {
 
     @Query("UPDATE alarms_table SET seconds = :newSecond WHERE id = :id ")
     suspend fun saveSecond(id: String, newSecond: Int)
+
+    @Query("UPDATE alarms_table SET isActive = :status WHERE isActive != :status")
+    suspend fun disableAll(status: Boolean = false)
+
+    @Query("SELECT * FROM alarms_table ORDER BY alarmCount ASC")
+    fun getGetGet(): Flow<List<AlarmEntity>>
 }

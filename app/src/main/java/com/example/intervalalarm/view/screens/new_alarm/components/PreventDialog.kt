@@ -1,7 +1,6 @@
 package com.example.intervalalarm.view.screens.new_alarm.components
 
 import android.content.Context
-import android.content.res.Resources
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -16,8 +15,8 @@ fun PreventDialog(
     onCancel: () -> Unit,
     onContinue: () -> Unit,
 ) {
-    val dismissButtonColor = MaterialTheme.colors.secondary.copy(alpha = 0.3f)
-    val confirmButtonColor = MaterialTheme.colors.primary.copy(alpha = 0.6f)
+    val dismissButtonColor = MaterialTheme.colors.secondary
+    val confirmButtonColor = MaterialTheme.colors.secondaryVariant
 
     val title: String = when (type) {
         DialogType.LowSecondAmount -> context
@@ -37,6 +36,9 @@ fun PreventDialog(
 
         DialogType.PassedTimeChosen -> context
             .getString(R.string.passed_time_chosen_dialog_title)
+
+        DialogType.PermissionRequired -> context
+            .getString(R.string.permission_required_dialog_title)
     }
 
     val message: String = when (type) {
@@ -57,6 +59,9 @@ fun PreventDialog(
 
         DialogType.PassedTimeChosen -> context
             .getString(R.string.passed_time_chosen_dialog_message)
+
+        DialogType.PermissionRequired -> context
+            .getString(R.string.permission_required_dialog_message)
     }
 
     AlertDialog(
@@ -75,6 +80,7 @@ fun PreventDialog(
                         || type == DialogType.DeleteAlarm
                         || type == DialogType.LowSecondAmount
                         || type == DialogType.ZeroInterval
+                        || type == DialogType.PermissionRequired
                     ) "Ok" else "Yes"
                 )
             }
@@ -102,4 +108,5 @@ sealed class DialogType {
     object SaveEdits : DialogType()
     object Cancel : DialogType()
     object PassedTimeChosen : DialogType()
+    object PermissionRequired : DialogType()
 }

@@ -1,6 +1,6 @@
 <resources>
     <string name="low_second_amount_dialog_title">Wrong interval!</string>
-    <string name="low_second_amount_dialog_message">You can`t set the interval for less then 15 seconds</string>
+    <string name="low_second_amount_dialog_message">At least 15 seconds is required</string>
 
     <string name="zero_interval_dialog_title">No interval chosen</string>
     <string name="zero_interval_dialog_message">To make an interval alarm, please, choose the interval you would like to use</string>
@@ -16,5 +16,8 @@
 
     <string name="passed_time_chosen_dialog_title">You can`t schedule it to the past</string>
     <string name="passed_time_chosen_dialog_message">Please, choose a valid time.\nTip: you can schedule it to at least 1 minute in future</string>
+
+    <string name="permission_required_dialog_title">Wait a second</string>
+    <string name="permission_required_dialog_message">For the application to work properly, please, provide a Notification permission.\nWe need it to notify you whenever the alarm has rung.</string>
 
 </resources>
