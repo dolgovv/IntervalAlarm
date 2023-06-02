@@ -37,13 +37,15 @@ class IntervalAlarmBroadcastReceiver : BroadcastReceiver() {
 
         val notificationService = AlarmNotificationService(context)
         val formattedInterval: String =
-            if (hours > 0 && minutes > 0) "$hours" + "h:" + "$minutes" + "m:" + "$seconds" + "s" else if (minutes > 0) "$minutes" + "m:" + "$seconds" + "s" else "$seconds" + "s"
+            if (hours > 0) "$hours" + "h:" + "$minutes" + "m:" + "$seconds" + "s"
+            else if (minutes > 0) "$minutes" + "m:" + "$seconds" + "s" else "$seconds" + "s"
 
         if (schedule != null) {
             if (schedule.isNotEmpty()) {
 
                 runBlocking(Dispatchers.Default) {
                     dao.triggerStatusByCount(count, true)
+                    dao.clearScheduleByCount(count, "Rang at $schedule")
                     Log.d("trigger scheduled", "ran block")
                 }
             }

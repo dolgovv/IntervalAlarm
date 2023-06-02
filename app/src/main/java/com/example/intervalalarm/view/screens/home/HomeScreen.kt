@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavController
+import com.example.intervalalarm.MainActivity
+import com.example.intervalalarm.model.permissions.IntervalPermissionManager
 import com.example.intervalalarm.view.screens.home.components.AlarmList
 import com.example.intervalalarm.view.screens.home.components.IntervalFloatButton
 import com.example.intervalalarm.view.screens.home.states.HomeScreenUiState
@@ -34,7 +36,7 @@ import com.example.intervalalarm.viewmodel.MainViewModel
 @Composable
 fun HomeScreen(
     vm: MainViewModel, navController: NavController,
-    state: HomeScreenUiState,
+    state: HomeScreenUiState
 ) {
     val context = LocalContext.current
 
@@ -52,7 +54,7 @@ fun HomeScreen(
         }
     }
 
-    val isPermissionGranted =
+    val isPermissionsGranted =
         if (Build.VERSION.SDK_INT >= 33) {
 
             checkSelfPermission(
@@ -77,6 +79,10 @@ fun HomeScreen(
     val showPermissionDialog = remember {
         mutableStateOf(false)
     }
+    val isPerm = if (Build.VERSION.SDK_INT >= 33) IntervalPermissionManager().isPermissionGranted(
+        context,
+        Manifest.permission.POST_NOTIFICATIONS
+    ) else true
 
     Column(
         modifier = Modifier
@@ -121,13 +127,15 @@ fun HomeScreen(
             state.allAlarms.find { certainAlarm ->
                 certainAlarm.id == it
             }?.let { alarmState ->
+
                 vm.triggerAlarm(context = context, alarmState, infoToast = {
                     Toast.makeText(
                         context,
                         "Schedule cleared!",
                         Toast.LENGTH_SHORT
                     ).show()
-                })
+                },
+                    showPermissionDialog = { showPermissionDialog.value = true })
             }
         }
     }
@@ -157,7 +165,7 @@ fun HomeScreen(
 
         IntervalFloatButton(
             function = {
-                if (isPermissionGranted) {
+                if (isPerm) {
                     navController.navigate(Screens.NewAlarmScreen.route)
                 } else {
                     showPermissionDialog.value = true

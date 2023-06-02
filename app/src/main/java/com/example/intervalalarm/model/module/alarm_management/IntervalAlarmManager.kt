@@ -29,7 +29,7 @@ class IntervalAlarmManager(private val context: Context) {
         if (context.checkSelfPermission(android.Manifest.permission.SCHEDULE_EXACT_ALARM) == PackageManager.PERMISSION_GRANTED) {
 
             val interval: Long =
-                (hours.toLong() * 1000 * 60 * 60) + minutes.toLong() * 1000 * 60 + seconds * 1000
+                (hours.toLong() * 1000 * 60 * 60) + minutes.toLong() * 1000 * 60 + seconds.toLong() * 1000
 
             intent.putExtra("title", title)
             intent.putExtra("description", description)

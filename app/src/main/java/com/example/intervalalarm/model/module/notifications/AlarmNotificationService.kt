@@ -41,31 +41,23 @@ class AlarmNotificationService(
         formattedInterval: String?
     ) {
 
+        when (type) {
 
-        if (context.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-
-            when (type) {
-
-                NotificationType.RebootNotification -> {
-                    rebootNotification()
-                }
-
-                NotificationType.RingAlarm -> {
-                    if (title != null && description != null && alarmCount != null && formattedInterval != null) {
-
-                        ringAlarmNotification(
-                            title = title,
-                            description = description,
-                            alarmCount = alarmCount,
-                            formattedInterval = formattedInterval
-                        )
-                    }
-                }
+            NotificationType.RebootNotification -> {
+                rebootNotification()
             }
 
-        } else {
-            Toast.makeText(context, "Notification permission not provided!", Toast.LENGTH_SHORT)
-                .show()
+            NotificationType.RingAlarm -> {
+                if (title != null && description != null && alarmCount != null && formattedInterval != null) {
+
+                    ringAlarmNotification(
+                        title = title,
+                        description = description,
+                        alarmCount = alarmCount,
+                        formattedInterval = formattedInterval
+                    )
+                }
+            }
         }
     }
 
@@ -81,6 +73,7 @@ class AlarmNotificationService(
             .setContentText("All of your alarms has been toggled off due to rebooting your device.")
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentIntent(activityPendingIntent)
+            .setTimeoutAfter(60 * 60 * 1000)
             .build()
         notificationManager.notify(REBOOT_NOTIFICATION, notification)
     }
@@ -105,6 +98,7 @@ class AlarmNotificationService(
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentIntent(activityPendingIntent)
             .setSound(Uri.parse("android.resource://" + context.packageName + "/" + R.raw.alarm_ringtone))
+            .setTimeoutAfter(60 * 60 * 1000)
             .build()
 
         notificationManager.notify(alarmCount, notification)

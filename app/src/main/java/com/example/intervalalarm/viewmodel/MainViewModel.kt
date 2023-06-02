@@ -4,6 +4,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
@@ -11,6 +12,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.intervalalarm.model.database.AlarmEntity
 import com.example.intervalalarm.model.module.alarm_management.IntervalAlarmBroadcastReceiver
 import com.example.intervalalarm.model.module.alarm_management.IntervalAlarmManager
+import com.example.intervalalarm.model.permissions.IntervalPermissionManager
 import com.example.intervalalarm.model.repository.AlarmsRepository
 import com.example.intervalalarm.view.screens.details.states.DetailsScreenUiState
 import com.example.intervalalarm.view.screens.home.states.AlarmStatus
@@ -20,10 +22,8 @@ import com.example.intervalalarm.view.screens.new_alarm.states.AddNewScreenUiSta
 import com.example.intervalalarm.view.screens.new_alarm.states.WheelPickerUiState
 import com.example.intervalalarm.viewmodel.use_cases.*
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @HiltViewModel
@@ -51,29 +51,38 @@ class MainViewModel @Inject constructor(
     val homeScreenUiState: StateFlow<HomeScreenUiState> = _homeScreenUiState.asStateFlow()
 
     fun triggerAlarm(
-        context: Context, alarm: AlarmUiState, infoToast: () -> Unit
+        context: Context,
+        alarm: AlarmUiState,
+        infoToast: () -> Unit,
+        showPermissionDialog: () -> Unit
     ) {
-        viewModelScope.launch {
-            if (context.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-                triggerAlarmStatusUseCase(context, alarm)
-            } else {
-                Toast.makeText(
+        val permMng = IntervalPermissionManager()
+
+        if (Build.VERSION.SDK_INT >= 33) {
+
+            if (permMng.isPermissionGranted(
                     context,
-                    "Notification permission is not provided!",
-                    Toast.LENGTH_SHORT
-                ).show()
+                    android.Manifest.permission.POST_NOTIFICATIONS
+                )
+            ) {
+
+                viewModelScope.launch {
+                    triggerAlarmStatusUseCase(context, alarm)
+                    if (alarm.status == AlarmStatus.Scheduled) {
+                        clearSchedule(alarm.id)
+                        infoToast()
+                    }
+
+                    Log.d("trigger scheduled", "triggered ${alarm.status}")
+                }
+            } else {
+                showPermissionDialog()
             }
-            clearSchedule(alarm.id)
-            if (alarm.status == AlarmStatus.Scheduled) {
-                infoToast()
-            }
-            Log.d("trigger scheduled", "triggered ${alarm.status}")
         }
     }
 
     private fun setIntervalAlarm(
-        context: Context,
-        alarm: AlarmUiState
+        context: Context, alarm: AlarmUiState
     ) {
 
         if (alarm.schedule.isEmpty()) {
@@ -108,8 +117,7 @@ class MainViewModel @Inject constructor(
 
             _homeScreenUiState.update { currentState ->
                 currentState.copy(
-                    allAlarms = getAllAlarms(alarms),
-                    enabledAlarms = getEnabledAlarms(alarms)
+                    allAlarms = getAllAlarms(alarms), enabledAlarms = getEnabledAlarms(alarms)
                 )
             }
             _homeScreenUiState.update {
@@ -160,7 +168,9 @@ class MainViewModel @Inject constructor(
 
         val intent = Intent(context, IntervalAlarmBroadcastReceiver::class.java)
         val pI = PendingIntent.getBroadcast(
-            context, detailsScreenUiState.value.chosenAlarm.count, intent,
+            context,
+            detailsScreenUiState.value.chosenAlarm.count,
+            intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
@@ -226,8 +236,7 @@ class MainViewModel @Inject constructor(
 
                     if (detailsScreenUiState.value.chosenAlarm.status == AlarmStatus.Enabled) {
                         triggerAlarmStatusUseCase(
-                            context,
-                            alarm = detailsScreenUiState.value.chosenAlarm
+                            context, alarm = detailsScreenUiState.value.chosenAlarm
                         )
                     }
                     IntervalAlarmManager(context).cancelAlarm(pI)
@@ -353,15 +362,14 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun updateDetailsScreen(currentAlarm: AlarmUiState) =
-        viewModelScope.launch {
-            _detailsScreenUiState.update {
-                it.copy(
-                    chosenAlarm = currentAlarm
-                )
-            }
-            updateList()
+    fun updateDetailsScreen(currentAlarm: AlarmUiState) = viewModelScope.launch {
+        _detailsScreenUiState.update {
+            it.copy(
+                chosenAlarm = currentAlarm
+            )
         }
+        updateList()
+    }
 
     fun deleteAllAlarms(context: Context) = viewModelScope.launch {
         _homeScreenUiState.value.allAlarms.map {
@@ -395,8 +403,7 @@ class MainViewModel @Inject constructor(
     fun addNewAlarm(context: Context, newAlarm: AlarmEntity) = viewModelScope.launch {
         addNewAlarmUseCase(newAlarm)
         setIntervalAlarm(
-            context,
-            alarm = newAlarm.toUiState()
+            context, alarm = newAlarm.toUiState()
         )
     }
 

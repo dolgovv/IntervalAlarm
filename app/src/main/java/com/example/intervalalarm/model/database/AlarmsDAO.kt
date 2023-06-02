@@ -44,6 +44,8 @@ interface AlarmsDAO {
 
     @Query("UPDATE alarms_table SET schedule = :blankSchedule WHERE id = :id")
     suspend fun clearSchedule(id: String, blankSchedule: String = "")
+    @Query("UPDATE alarms_table SET schedule = :blankSchedule WHERE alarmCount = :count")
+    suspend fun clearScheduleByCount(count: Int, blankSchedule: String = "")
 
     @Query("UPDATE alarms_table SET hours = :newHour WHERE id = :id ")
     suspend fun saveHour(id: String, newHour: Int)

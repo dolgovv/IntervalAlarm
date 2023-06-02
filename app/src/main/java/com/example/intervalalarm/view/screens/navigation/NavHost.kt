@@ -1,11 +1,13 @@
 package com.example.intervalalarm.view.screens.navigation
 
+import android.os.Build
 import androidx.compose.runtime.*
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.intervalalarm.MainActivity
 import com.example.intervalalarm.view.screens.details.DetailsScreen
 import com.example.intervalalarm.view.screens.home.HomeScreen
 import com.example.intervalalarm.view.screens.new_alarm.NewAlarmScreen

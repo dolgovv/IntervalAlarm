@@ -40,7 +40,7 @@ fun IntervalFloatButton(
                     imageVector = icon,
                     contentDescription = "navigation button",
                     Modifier
-                        .size(55.dp)
+                        .size(60.dp)
                         .padding(8.dp),
                     tint = iconColor
                 )

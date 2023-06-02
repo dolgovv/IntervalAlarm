@@ -62,6 +62,17 @@ fun AdditionalInfoCard(
         }, chosenDate.hour, chosenDate.minute, false
     )
 
+    val currentScheduleFormatted =
+         if (schedule.isNotEmpty()) LocalDateTime.parse(schedule, DateTimeFormatter.ISO_LOCAL_DATE_TIME).format(timeFormatter)
+            .toString() else ""
+
+    val isSchedulePassed = LocalDateTime.parse(
+        LocalDateTime.now().toString(),
+        DateTimeFormatter.ISO_LOCAL_DATE_TIME
+    ).format(timeFormatter).toString() == currentScheduleFormatted
+
+    val kek = if (isSchedulePassed) "Rings at $currentScheduleFormatted" else "Rang at $currentScheduleFormatted"
+
     if (showPastTimeDialog.value) {
         PreventDialog(context = context,
             type = DialogType.PassedTimeChosen,
@@ -134,11 +145,13 @@ fun AdditionalInfoCard(
             ),
             label = {
                 Text(
-                    text = if (schedule.isEmpty())
-                    {
+                    text = if (schedule.isEmpty()) {
                         "Empty schedule"
                     } else {
-                        "Rings at " + LocalDateTime.parse(schedule, DateTimeFormatter.ISO_LOCAL_DATE_TIME).format(timeFormatter).toString()
+                        "Rings at " + LocalDateTime.parse(
+                            schedule,
+                            DateTimeFormatter.ISO_LOCAL_DATE_TIME
+                        ).format(timeFormatter).toString()
                     }
                 )
             },
@@ -159,6 +172,7 @@ fun LightPrev() {
         }
     }
 }
+
 @Preview(showBackground = true)
 @Composable
 fun DarkPrev() {

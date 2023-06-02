@@ -2,6 +2,7 @@ package com.example.intervalalarm
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.pm.PackageManager
 import android.media.AudioAttributes
 import android.net.Uri
 import android.os.Build
@@ -19,6 +20,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.intervalalarm.model.module.notifications.AlarmNotificationService
+import com.example.intervalalarm.model.module.notifications.NotificationType
+import com.example.intervalalarm.model.permissions.IntervalPermissionManager
 import com.example.intervalalarm.ui.theme.IntervalAlarmTheme
 import com.example.intervalalarm.view.screens.navigation.NavScreens
 import com.example.intervalalarm.view.screens.navigation.Screens
@@ -29,7 +32,8 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     companion object {
-        const val NOTIFICATIONS_PERMISSION_CODE = 101
+        const val NOTIFICATIONS_PERMISSION_CODE =
+            IntervalPermissionManager.NOTIFICATIONS_PERMISSION_CODE
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,12 +41,15 @@ class MainActivity : ComponentActivity() {
 
         val context = applicationContext
 
-        when {
-            Build.VERSION.SDK_INT >= 33 -> {
-                if (!shouldShowRequestPermissionRationale(NOTIFICATIONS_PERMISSION_CODE.toString())) {
-                    ActivityCompat.requestPermissions(
-                        this,
-                        listOf(android.Manifest.permission.POST_NOTIFICATIONS).toTypedArray(),
+        if (Build.VERSION.SDK_INT >= 33) {
+            if (!shouldShowRequestPermissionRationale(IntervalPermissionManager.NOTIFICATIONS_PERMISSION_CODE.toString())) {
+                if (ActivityCompat.checkSelfPermission(
+                        context,
+                        android.Manifest.permission.POST_NOTIFICATIONS
+                    ) == PackageManager.PERMISSION_DENIED
+                ) {
+                    requestPermissions(
+                        listOf<String>(android.Manifest.permission.POST_NOTIFICATIONS).toTypedArray(),
                         NOTIFICATIONS_PERMISSION_CODE
                     )
                 }
@@ -65,7 +72,6 @@ class MainActivity : ComponentActivity() {
             .setUsage(AudioAttributes.USAGE_ALARM)
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
             .build()
-
         alarmChannel.description = "Notifies you when the alarm goes off"
         alarmChannel.setSound(
             Uri.parse("android.resource://" + context.packageName + "/" + R.raw.alarm_ringtone),
@@ -74,7 +80,6 @@ class MainActivity : ComponentActivity() {
 
         AlarmNotificationService(context).createChannel(infoChannel)
         AlarmNotificationService(context).createChannel(alarmChannel)
-
 
         setContent {
 
@@ -93,10 +98,11 @@ class MainActivity : ComponentActivity() {
                             .fillMaxSize(),
                         verticalArrangement = Arrangement.Top
                     ) {
+
                         NavScreens(
                             navController = navController,
                             vm = viewModel,
-                            autoNavigateTo = intent.extras?.getInt("from_notification")
+                            autoNavigateTo = intent.extras?.getInt("from_notification"),
                         )
                     }
                 }
