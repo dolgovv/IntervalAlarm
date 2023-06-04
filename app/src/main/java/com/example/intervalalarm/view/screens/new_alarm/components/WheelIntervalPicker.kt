@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.intervalalarm.R
 import com.example.intervalalarm.view.screens.new_alarm.states.WheelPickerUiState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -71,8 +72,8 @@ fun WheelIntervalPicker(
         modifier = Modifier
             .fillMaxWidth()
             .height(230.dp)
-            .padding(horizontal = 22.dp)
-            .padding(vertical = 12.dp)
+            .padding(horizontal = R.dimen.padding_large.dp)
+            .padding(vertical = R.dimen.padding_medium.dp)
     ) {
         Row(
             modifier = Modifier

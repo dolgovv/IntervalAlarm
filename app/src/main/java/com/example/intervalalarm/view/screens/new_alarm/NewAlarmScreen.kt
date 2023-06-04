@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.intervalalarm.R
 import com.example.intervalalarm.model.database.AlarmEntity
 import com.example.intervalalarm.ui.theme.IntervalAlarmTheme
 import com.example.intervalalarm.view.screens.home.components.IntervalFloatButton
@@ -58,7 +59,7 @@ fun NewAlarmScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(12.dp),
+            .padding(R.dimen.padding_medium.dp),
         verticalArrangement = Arrangement.Top
     ) {
 
@@ -125,7 +126,7 @@ fun NewAlarmScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(150.dp)
-                .padding(bottom = 22.dp),
+                .padding(bottom = R.dimen.padding_large.dp),
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -164,7 +165,7 @@ fun NewAlarmScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(8.dp),
+                .padding(R.dimen.padding_small.dp),
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.End
         ) {

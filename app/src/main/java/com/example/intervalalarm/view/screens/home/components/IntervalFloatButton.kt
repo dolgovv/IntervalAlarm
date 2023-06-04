@@ -14,6 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.intervalalarm.R
 
 @Composable
 fun IntervalFloatButton(
@@ -41,7 +42,7 @@ fun IntervalFloatButton(
                     contentDescription = "navigation button",
                     Modifier
                         .size(60.dp)
-                        .padding(8.dp),
+                        .padding(R.dimen.padding_small.dp),
                     tint = iconColor
                 )
             } else if (isScheduled) {
@@ -52,8 +53,8 @@ fun IntervalFloatButton(
                     Text(
                         modifier =
                         Modifier
-                            .padding(horizontal = 8.dp)
-                            .padding(vertical = 20.dp),
+                            .padding(horizontal = R.dimen.padding_small.dp)
+                            .padding(vertical = R.dimen.padding_large.dp),
                         color = Color.White.copy(alpha = 0.8f),
                         fontWeight = FontWeight(1000),
                         text = "SCHEDULE",
@@ -63,8 +64,8 @@ fun IntervalFloatButton(
                     Text(
                         modifier =
                         Modifier
-                            .padding(horizontal = 8.dp)
-                            .padding(vertical = 20.dp),
+                            .padding(horizontal = R.dimen.padding_small.dp)
+                            .padding(vertical = R.dimen.padding_large.dp),
                         color = Color.Transparent,
                         fontWeight = FontWeight(1000),
                         text = "START NOW",
@@ -76,8 +77,8 @@ fun IntervalFloatButton(
                 Text(
                     modifier =
                     Modifier
-                        .padding(horizontal = 8.dp)
-                        .padding(vertical = 20.dp),
+                        .padding(horizontal = R.dimen.padding_small.dp)
+                        .padding(vertical = R.dimen.padding_large.dp),
                     color = Color.White.copy(alpha = 0.8f),
                     fontWeight = FontWeight(1000),
                     text = "START NOW",

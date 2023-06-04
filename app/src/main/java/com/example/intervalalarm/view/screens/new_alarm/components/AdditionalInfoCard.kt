@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.intervalalarm.R
 import com.example.intervalalarm.ui.theme.IntervalAlarmTheme
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -156,33 +157,5 @@ fun AdditionalInfoCard(
                 )
             },
             value = "", onValueChange = { })
-    }
-}
-
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-fun LightPrev() {
-    IntervalAlarmTheme {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(5.dp)
-        ) {
-//            AdditionalInfoCard("", {}, {})
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DarkPrev() {
-    IntervalAlarmTheme {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(5.dp)
-        ) {
-//            AdditionalInfoCard("", {}, {})
-        }
     }
 }

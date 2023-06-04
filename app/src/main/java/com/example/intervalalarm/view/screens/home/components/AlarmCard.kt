@@ -1,6 +1,7 @@
 package com.example.intervalalarm.view.screens.home.components
 
 import android.content.res.Configuration
+import android.content.res.Resources
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,12 +13,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.example.intervalalarm.R
 import com.example.intervalalarm.ui.theme.IntervalAlarmTheme
 import com.example.intervalalarm.view.screens.home.states.AlarmStatus
 import com.example.intervalalarm.view.screens.home.states.AlarmUiState
@@ -26,6 +29,8 @@ import com.example.intervalalarm.view.screens.home.states.AlarmUiState
 fun AlarmCard(
     alarm: AlarmUiState, openAlarmDetails: () -> Unit, triggerAlarmStatus: (id: String) -> Unit
 ) {
+
+    val context = LocalContext.current
 
     val buttonText = when (alarm.status) {
         AlarmStatus.Disabled -> "START NOW"
@@ -76,7 +81,7 @@ fun AlarmCard(
     ) {
 
         Row(
-            modifier = Modifier.padding(6.dp),
+            modifier = Modifier.padding(R.dimen.padding_small.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -84,8 +89,7 @@ fun AlarmCard(
             Column(
                 modifier = Modifier
                     .fillMaxWidth(0.55f)
-                    .padding(vertical = 6.dp)
-                    .padding(start = 4.dp, end = 6.dp)
+                    .padding(R.dimen.padding_small.dp)
                     .heightIn(50.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.End
@@ -107,7 +111,7 @@ fun AlarmCard(
                     overflow = TextOverflow.Ellipsis,
                     text = infoText,
                     fontSize = MaterialTheme.typography.body1.fontSize,
-                    modifier = Modifier.padding(bottom = 6.dp)
+                    modifier = Modifier.padding(bottom = R.dimen.padding_small.dp)
                 )
             }
 
@@ -125,7 +129,7 @@ fun AlarmCard(
                         shape = RoundedCornerShape(50.dp),
                         modifier = Modifier.heightIn(min = 80.dp),
                         colors = ButtonDefaults.buttonColors(backgroundColor = buttonBackgroundColor),
-                        contentPadding = PaddingValues(horizontal = 6.dp),
+                        contentPadding = PaddingValues(horizontal = R.dimen.padding_small.dp),
                         border = BorderStroke(Dp.Hairline, buttonBorderColor),
                         onClick = {
                             triggerAlarmStatus(alarm.id)

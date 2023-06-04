@@ -21,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.intervalalarm.R
 import com.example.intervalalarm.ui.theme.IntervalAlarmTheme
 import com.example.intervalalarm.view.screens.details.states.DetailsScreenUiState
 import com.example.intervalalarm.view.screens.home.components.IntervalFloatButton
@@ -83,7 +84,7 @@ fun DetailsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(12.dp), verticalArrangement = Arrangement.Top
+            .padding(R.dimen.padding_medium.dp), verticalArrangement = Arrangement.Top
     ) {
 
         /** DELETE DIALOG */
@@ -185,8 +186,8 @@ fun DetailsScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(150.dp)
-                .padding(bottom = 22.dp)
-                .padding(horizontal = 12.dp),
+                .padding(bottom = R.dimen.padding_large.dp)
+                .padding(horizontal = R.dimen.padding_large.dp),
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.Start
         ) {
@@ -239,7 +240,7 @@ fun DetailsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp),
+            .padding(R.dimen.padding_large.dp),
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.End
     ) {
@@ -273,7 +274,7 @@ fun DetailsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp),
+            .padding(R.dimen.padding_large.dp),
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.Start
     ) {

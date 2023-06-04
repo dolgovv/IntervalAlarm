@@ -24,6 +24,7 @@ import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavController
 import com.example.intervalalarm.MainActivity
+import com.example.intervalalarm.R
 import com.example.intervalalarm.model.permissions.IntervalPermissionManager
 import com.example.intervalalarm.view.screens.home.components.AlarmList
 import com.example.intervalalarm.view.screens.home.components.IntervalFloatButton
@@ -87,7 +88,7 @@ fun HomeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(12.dp), verticalArrangement = Arrangement.Top
+            .padding(R.dimen.padding_medium.dp), verticalArrangement = Arrangement.Top
     ) {
         Column(
             modifier = Modifier
@@ -110,14 +111,14 @@ fun HomeScreen(
                     fontSize = (if (!isFolded.value) 40.sp else 28.sp),
                     textAlign = TextAlign.Center,
                     modifier = Modifier
-                        .padding(vertical = 20.dp)
+                        .padding(vertical = R.dimen.padding_large.dp)
                         .clickable { vm.deleteAllAlarms(context) })
             }
 
             Text(text = if (enabledList.isNotEmpty()) "Interval is $formattedInterval" else "",
                 fontSize = 28.sp,
                 modifier = Modifier
-                    .padding(vertical = 12.dp)
+                    .padding(vertical = R.dimen.padding_medium.dp)
                     .clickable { vm.deleteAllAlarms(context) })
         }
 
@@ -143,7 +144,7 @@ fun HomeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp),
+            .padding(R.dimen.padding_large.dp),
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.End
     ) {
