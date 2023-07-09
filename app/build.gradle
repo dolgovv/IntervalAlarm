@@ -49,22 +49,16 @@ android {
 }
 dependencies {
 
-
-    //Hilt
-    def hilt_version = "2.44"
-
+    //Dagger
     implementation("com.google.dagger:hilt-android:$hilt_version")
     kapt("com.google.dagger:hilt-android-compiler:$hilt_version")
 
     implementation "androidx.hilt:hilt-navigation-compose:1.0.0"
 
     //Room
-    def roomVersion = "2.4.3"
-
     implementation "androidx.room:room-ktx:$roomVersion"
     kapt "androidx.room:room-compiler:$roomVersion"
 
-    def lifecycle_version = "2.5.1"
     implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
 
