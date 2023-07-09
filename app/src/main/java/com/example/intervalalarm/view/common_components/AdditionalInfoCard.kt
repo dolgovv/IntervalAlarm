@@ -1,7 +1,6 @@
-package com.example.intervalalarm.view.screens.new_alarm.components
+package com.example.intervalalarm.view.common_components
 
 import android.app.TimePickerDialog
-import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CornerSize
@@ -17,10 +16,7 @@ import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.SoftwareKeyboardController
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.intervalalarm.R
-import com.example.intervalalarm.ui.theme.IntervalAlarmTheme
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 

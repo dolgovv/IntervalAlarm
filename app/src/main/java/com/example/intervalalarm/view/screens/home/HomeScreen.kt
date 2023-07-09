@@ -23,15 +23,14 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavController
-import com.example.intervalalarm.MainActivity
 import com.example.intervalalarm.R
 import com.example.intervalalarm.model.permissions.IntervalPermissionManager
 import com.example.intervalalarm.view.screens.home.components.AlarmList
-import com.example.intervalalarm.view.screens.home.components.IntervalFloatButton
+import com.example.intervalalarm.view.common_components.IntervalFloatButton
 import com.example.intervalalarm.view.screens.home.states.HomeScreenUiState
-import com.example.intervalalarm.view.screens.navigation.Screens
-import com.example.intervalalarm.view.screens.new_alarm.components.DialogType
-import com.example.intervalalarm.view.screens.new_alarm.components.PreventDialog
+import com.example.intervalalarm.model.navigation.Screens
+import com.example.intervalalarm.view.common_components.DialogType
+import com.example.intervalalarm.view.common_components.PreventDialog
 import com.example.intervalalarm.viewmodel.MainViewModel
 
 @Composable

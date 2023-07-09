@@ -1,4 +1,4 @@
-package com.example.intervalalarm.view.screens.navigation
+package com.example.intervalalarm.model.navigation
 
 sealed class Screens(val route: String) {
     object HomeScreen : Screens(route = "home_screen")

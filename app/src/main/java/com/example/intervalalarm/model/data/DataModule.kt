@@ -1,10 +1,10 @@
-package com.example.intervalalarm.model.module
+package com.example.intervalalarm.model.data
 
 import android.content.Context
 import androidx.room.Room
-import com.example.intervalalarm.model.database.AlarmsDAO
-import com.example.intervalalarm.model.database.AlarmsDatabase
-import com.example.intervalalarm.model.repository.AlarmsRepository
+import com.example.intervalalarm.model.data.database.AlarmsDAO
+import com.example.intervalalarm.model.data.database.AlarmsDatabase
+import com.example.intervalalarm.model.data.repository.AlarmsRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,7 +34,7 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun provideRepository(dao: AlarmsDAO): AlarmsRepository{
+    fun provideRepository(dao: AlarmsDAO): AlarmsRepository {
         return AlarmsRepository(dao = dao)
     }
 }

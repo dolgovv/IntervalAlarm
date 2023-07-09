@@ -1,8 +1,8 @@
-package com.example.intervalalarm.model.repository
+package com.example.intervalalarm.model.data.repository
 
 import androidx.annotation.WorkerThread
-import com.example.intervalalarm.model.database.AlarmEntity
-import com.example.intervalalarm.model.database.AlarmsDAO
+import com.example.intervalalarm.model.data.database.AlarmEntity
+import com.example.intervalalarm.model.data.database.AlarmsDAO
 import kotlinx.coroutines.flow.Flow
 
 class AlarmsRepository(private val dao: AlarmsDAO) {

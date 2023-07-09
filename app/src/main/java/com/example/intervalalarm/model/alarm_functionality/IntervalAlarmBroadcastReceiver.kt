@@ -1,4 +1,4 @@
-package com.example.intervalalarm.model.module.alarm_management
+package com.example.intervalalarm.model.alarm_functionality
 
 import android.app.AlarmManager
 import android.content.BroadcastReceiver
@@ -6,10 +6,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.Intent.ACTION_BOOT_COMPLETED
 import android.util.Log
-import com.example.intervalalarm.model.database.AlarmsDAO
-import com.example.intervalalarm.model.module.notifications.AlarmNotificationService
-import com.example.intervalalarm.model.module.notifications.NotificationType
-import com.example.intervalalarm.model.repository.AlarmsRepository
+import com.example.intervalalarm.model.data.database.AlarmsDAO
+import com.example.intervalalarm.model.alarm_functionality.notifications.AlarmNotificationService
+import com.example.intervalalarm.model.alarm_functionality.notifications.NotificationType
+import com.example.intervalalarm.model.data.repository.AlarmsRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

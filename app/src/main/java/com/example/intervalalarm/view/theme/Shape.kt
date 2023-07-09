@@ -1,4 +1,4 @@
-package com.example.intervalalarm.ui.theme
+package com.example.intervalalarm.view.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Shapes

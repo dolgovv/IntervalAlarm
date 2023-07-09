@@ -1,4 +1,4 @@
-package com.example.intervalalarm.model.module.alarm_management
+package com.example.intervalalarm.model.alarm_functionality
 
 import android.app.AlarmManager
 import android.app.PendingIntent

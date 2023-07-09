@@ -32,7 +32,7 @@
         </activity>
 
         <receiver
-            android:name=".model.module.alarm_management.IntervalAlarmBroadcastReceiver"
+            android:name=".model.alarm_functionality.IntervalAlarmBroadcastReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>

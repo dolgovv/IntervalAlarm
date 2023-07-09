@@ -1,4 +1,4 @@
-package com.example.intervalalarm.model.module.notifications
+package com.example.intervalalarm.model.alarm_functionality.notifications
 
 import android.app.NotificationChannel
 import android.app.NotificationManager

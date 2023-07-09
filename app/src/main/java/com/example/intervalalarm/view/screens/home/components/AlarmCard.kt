@@ -21,7 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.intervalalarm.R
-import com.example.intervalalarm.ui.theme.IntervalAlarmTheme
+import com.example.intervalalarm.view.theme.IntervalAlarmTheme
 import com.example.intervalalarm.view.screens.home.states.AlarmStatus
 import com.example.intervalalarm.view.screens.home.states.AlarmUiState
 

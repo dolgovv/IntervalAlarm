@@ -1,4 +1,4 @@
-package com.example.intervalalarm.view.screens.new_alarm.components
+package com.example.intervalalarm.view.common_components
 
 import android.content.Context
 import androidx.compose.foundation.shape.RoundedCornerShape

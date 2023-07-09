@@ -1,6 +1,6 @@
 package com.example.intervalalarm.view.screens.home.states
 
-import com.example.intervalalarm.model.database.AlarmEntity
+import com.example.intervalalarm.model.data.database.AlarmEntity
 
 data class AlarmUiState(
     val id: String = "null",

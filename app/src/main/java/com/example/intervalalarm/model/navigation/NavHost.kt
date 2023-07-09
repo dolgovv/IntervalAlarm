@@ -1,4 +1,4 @@
-package com.example.intervalalarm.view.screens.navigation
+package com.example.intervalalarm.model.navigation
 
 import android.os.Build
 import androidx.compose.runtime.*

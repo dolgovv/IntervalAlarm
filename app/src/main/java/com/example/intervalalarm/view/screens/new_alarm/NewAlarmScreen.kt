@@ -17,14 +17,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.intervalalarm.R
-import com.example.intervalalarm.model.database.AlarmEntity
-import com.example.intervalalarm.ui.theme.IntervalAlarmTheme
-import com.example.intervalalarm.view.screens.home.components.IntervalFloatButton
+import com.example.intervalalarm.model.data.database.AlarmEntity
+import com.example.intervalalarm.view.theme.IntervalAlarmTheme
+import com.example.intervalalarm.view.common_components.IntervalFloatButton
 import com.example.intervalalarm.view.screens.home.states.AlarmUiState
-import com.example.intervalalarm.view.screens.new_alarm.components.AdditionalInfoCard
-import com.example.intervalalarm.view.screens.new_alarm.components.DialogType
-import com.example.intervalalarm.view.screens.new_alarm.components.PreventDialog
-import com.example.intervalalarm.view.screens.new_alarm.components.WheelIntervalPicker
+import com.example.intervalalarm.view.common_components.AdditionalInfoCard
+import com.example.intervalalarm.view.common_components.DialogType
+import com.example.intervalalarm.view.common_components.PreventDialog
+import com.example.intervalalarm.view.common_components.WheelIntervalPicker
 import com.example.intervalalarm.view.screens.new_alarm.states.AddNewScreenUiState
 import com.example.intervalalarm.viewmodel.MainViewModel
 

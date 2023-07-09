@@ -1,4 +1,4 @@
-package com.example.intervalalarm.model.database
+package com.example.intervalalarm.model.data.database
 
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow

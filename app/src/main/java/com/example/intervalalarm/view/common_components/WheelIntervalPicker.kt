@@ -1,4 +1,4 @@
-package com.example.intervalalarm.view.screens.new_alarm.components
+package com.example.intervalalarm.view.common_components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*

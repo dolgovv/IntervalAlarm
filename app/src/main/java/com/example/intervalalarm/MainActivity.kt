@@ -19,12 +19,12 @@ import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.intervalalarm.model.module.notifications.AlarmNotificationService
-import com.example.intervalalarm.model.module.notifications.NotificationType
+import com.example.intervalalarm.model.alarm_functionality.notifications.AlarmNotificationService
+import com.example.intervalalarm.model.alarm_functionality.notifications.NotificationType
 import com.example.intervalalarm.model.permissions.IntervalPermissionManager
-import com.example.intervalalarm.ui.theme.IntervalAlarmTheme
-import com.example.intervalalarm.view.screens.navigation.NavScreens
-import com.example.intervalalarm.view.screens.navigation.Screens
+import com.example.intervalalarm.view.theme.IntervalAlarmTheme
+import com.example.intervalalarm.model.navigation.NavScreens
+import com.example.intervalalarm.model.navigation.Screens
 import com.example.intervalalarm.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
