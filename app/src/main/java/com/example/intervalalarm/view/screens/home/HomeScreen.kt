@@ -87,7 +87,7 @@ fun HomeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(R.dimen.padding_medium.dp), verticalArrangement = Arrangement.Top
+            .padding(12.dp), verticalArrangement = Arrangement.Top
     ) {
         Column(
             modifier = Modifier
@@ -110,14 +110,14 @@ fun HomeScreen(
                     fontSize = (if (!isFolded.value) 40.sp else 28.sp),
                     textAlign = TextAlign.Center,
                     modifier = Modifier
-                        .padding(vertical = R.dimen.padding_large.dp)
+                        .padding(vertical = 22.dp)
                         .clickable { vm.deleteAllAlarms(context) })
             }
 
             Text(text = if (enabledList.isNotEmpty()) "Interval is $formattedInterval" else "",
                 fontSize = 28.sp,
                 modifier = Modifier
-                    .padding(vertical = R.dimen.padding_medium.dp)
+                    .padding(vertical = 12.dp)
                     .clickable { vm.deleteAllAlarms(context) })
         }
 
@@ -143,7 +143,7 @@ fun HomeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(R.dimen.padding_large.dp),
+            .padding(22.dp),
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.End
     ) {

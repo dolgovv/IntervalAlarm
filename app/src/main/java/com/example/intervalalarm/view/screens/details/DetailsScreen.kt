@@ -32,7 +32,6 @@ import com.example.intervalalarm.view.common_components.WheelIntervalPicker
 import com.example.intervalalarm.view.common_components.WheelPickerStatus
 import com.example.intervalalarm.view.screens.home.states.AlarmStatus
 import com.example.intervalalarm.view.screens.home.states.AlarmUiState
-import com.example.intervalalarm.view.screens.new_alarm.components.*
 import com.example.intervalalarm.viewmodel.MainViewModel
 import java.util.*
 
@@ -89,7 +88,7 @@ fun DetailsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(R.dimen.padding_medium.dp), verticalArrangement = Arrangement.Top
+            .padding(12.dp), verticalArrangement = Arrangement.Top
     ) {
 
         /** DELETE DIALOG */
@@ -191,8 +190,8 @@ fun DetailsScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(150.dp)
-                .padding(bottom = R.dimen.padding_large.dp)
-                .padding(horizontal = R.dimen.padding_large.dp),
+                .padding(bottom = 22.dp)
+                .padding(horizontal = 22.dp),
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.Start
         ) {
@@ -245,7 +244,7 @@ fun DetailsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(R.dimen.padding_large.dp),
+            .padding(22.dp),
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.End
     ) {
@@ -279,7 +278,7 @@ fun DetailsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(R.dimen.padding_large.dp),
+            .padding(22.dp),
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.Start
     ) {

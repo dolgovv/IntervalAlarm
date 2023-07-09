@@ -65,7 +65,7 @@ fun PreventDialog(
     }
 
     AlertDialog(
-        shape = RoundedCornerShape(15.dp),
+        shape = RoundedCornerShape(14.dp),
         onDismissRequest = { hideDialog() },
         confirmButton = {
             Button(

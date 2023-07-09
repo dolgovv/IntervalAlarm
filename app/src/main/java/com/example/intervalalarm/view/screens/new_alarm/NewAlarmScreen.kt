@@ -38,9 +38,6 @@ fun NewAlarmScreen(
     onBackPressed: () -> Unit
 ) {
     val context = LocalContext.current
-
-//    val list = vm.homeScreenUiState.collectAsState().value.allAlarms
-
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -59,7 +56,7 @@ fun NewAlarmScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(R.dimen.padding_medium.dp),
+            .padding(12.dp),
         verticalArrangement = Arrangement.Top
     ) {
 
@@ -126,7 +123,7 @@ fun NewAlarmScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(150.dp)
-                .padding(bottom = R.dimen.padding_large.dp),
+                .padding(bottom = 22.dp),
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -165,7 +162,7 @@ fun NewAlarmScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(R.dimen.padding_small.dp),
+                .padding(6.dp),
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.End
         ) {

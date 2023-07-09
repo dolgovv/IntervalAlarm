@@ -20,7 +20,6 @@ class IntervalPermissionManager {
             android.Manifest.permission.POST_NOTIFICATIONS ->
 
                 if (Build.VERSION.SDK_INT >= 33) {
-
                     context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
                 } else {
                     true

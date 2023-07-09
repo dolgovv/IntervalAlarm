@@ -29,9 +29,6 @@ import com.example.intervalalarm.view.screens.home.states.AlarmUiState
 fun AlarmCard(
     alarm: AlarmUiState, openAlarmDetails: () -> Unit, triggerAlarmStatus: (id: String) -> Unit
 ) {
-
-    val context = LocalContext.current
-
     val buttonText = when (alarm.status) {
         AlarmStatus.Disabled -> "START NOW"
         AlarmStatus.Enabled -> "STOP IT"
@@ -81,7 +78,7 @@ fun AlarmCard(
     ) {
 
         Row(
-            modifier = Modifier.padding(R.dimen.padding_small.dp),
+            modifier = Modifier.padding(6.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -89,7 +86,7 @@ fun AlarmCard(
             Column(
                 modifier = Modifier
                     .fillMaxWidth(0.55f)
-                    .padding(R.dimen.padding_small.dp)
+                    .padding(6.dp)
                     .heightIn(50.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.End
@@ -111,7 +108,7 @@ fun AlarmCard(
                     overflow = TextOverflow.Ellipsis,
                     text = infoText,
                     fontSize = MaterialTheme.typography.body1.fontSize,
-                    modifier = Modifier.padding(bottom = R.dimen.padding_small.dp)
+                    modifier = Modifier.padding(bottom = 6.dp)
                 )
             }
 
@@ -129,7 +126,7 @@ fun AlarmCard(
                         shape = RoundedCornerShape(50.dp),
                         modifier = Modifier.heightIn(min = 80.dp),
                         colors = ButtonDefaults.buttonColors(backgroundColor = buttonBackgroundColor),
-                        contentPadding = PaddingValues(horizontal = R.dimen.padding_small.dp),
+                        contentPadding = PaddingValues(horizontal = 6.dp),
                         border = BorderStroke(Dp.Hairline, buttonBorderColor),
                         onClick = {
                             triggerAlarmStatus(alarm.id)

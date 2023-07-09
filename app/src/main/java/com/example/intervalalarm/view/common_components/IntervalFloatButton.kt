@@ -42,7 +42,7 @@ fun IntervalFloatButton(
                     contentDescription = "navigation button",
                     Modifier
                         .size(60.dp)
-                        .padding(R.dimen.padding_small.dp),
+                        .padding(6.dp),
                     tint = iconColor
                 )
             } else if (isScheduled) {
@@ -53,8 +53,8 @@ fun IntervalFloatButton(
                     Text(
                         modifier =
                         Modifier
-                            .padding(horizontal = R.dimen.padding_small.dp)
-                            .padding(vertical = R.dimen.padding_large.dp),
+                            .padding(horizontal = 6.dp)
+                            .padding(vertical = 22.dp),
                         color = Color.White.copy(alpha = 0.8f),
                         fontWeight = FontWeight(1000),
                         text = "SCHEDULE",
@@ -64,8 +64,8 @@ fun IntervalFloatButton(
                     Text(
                         modifier =
                         Modifier
-                            .padding(horizontal = R.dimen.padding_small.dp)
-                            .padding(vertical = R.dimen.padding_large.dp),
+                            .padding(horizontal = 6.dp)
+                            .padding(vertical = 22.dp),
                         color = Color.Transparent,
                         fontWeight = FontWeight(1000),
                         text = "START NOW",
@@ -77,8 +77,8 @@ fun IntervalFloatButton(
                 Text(
                     modifier =
                     Modifier
-                        .padding(horizontal = R.dimen.padding_small.dp)
-                        .padding(vertical = R.dimen.padding_large.dp),
+                        .padding(horizontal = 6.dp)
+                        .padding(vertical = 22.dp),
                     color = Color.White.copy(alpha = 0.8f),
                     fontWeight = FontWeight(1000),
                     text = "START NOW",

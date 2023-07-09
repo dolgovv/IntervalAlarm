@@ -68,8 +68,6 @@ fun AdditionalInfoCard(
         DateTimeFormatter.ISO_LOCAL_DATE_TIME
     ).format(timeFormatter).toString() == currentScheduleFormatted
 
-    val kek = if (isSchedulePassed) "Rings at $currentScheduleFormatted" else "Rang at $currentScheduleFormatted"
-
     if (showPastTimeDialog.value) {
         PreventDialog(context = context,
             type = DialogType.PassedTimeChosen,

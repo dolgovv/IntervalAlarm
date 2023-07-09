@@ -72,8 +72,8 @@ fun WheelIntervalPicker(
         modifier = Modifier
             .fillMaxWidth()
             .height(230.dp)
-            .padding(horizontal = R.dimen.padding_large.dp)
-            .padding(vertical = R.dimen.padding_medium.dp)
+            .padding(horizontal = 22.dp)
+            .padding(vertical = 12.dp)
     ) {
         Row(
             modifier = Modifier

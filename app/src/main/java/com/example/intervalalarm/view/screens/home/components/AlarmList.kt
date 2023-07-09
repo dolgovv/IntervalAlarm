@@ -54,7 +54,7 @@ fun AlarmList(
 
                 Row(
                     modifier = Modifier
-                        .padding(top = R.dimen.padding_medium.dp)
+                        .padding(top = 12.dp)
                         .fillMaxWidth()
                         .wrapContentHeight()
                         .clip(RoundedCornerShape(34.dp))

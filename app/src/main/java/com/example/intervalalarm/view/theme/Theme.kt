@@ -1,5 +1,6 @@
 package com.example.intervalalarm.view.theme
 
+import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
@@ -41,6 +42,7 @@ fun IntervalAlarmTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
+
     val colors = if (darkTheme) {
         DarkColorPalette
     } else {
