@@ -4,6 +4,9 @@ import android.content.Context
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.example.intervalalarm.R
 
@@ -65,10 +68,12 @@ fun PreventDialog(
     }
 
     AlertDialog(
+        modifier = Modifier.semantics { contentDescription = "Prevent Dialog: Window" },
         shape = RoundedCornerShape(14.dp),
         onDismissRequest = { hideDialog() },
         confirmButton = {
             Button(
+                modifier = Modifier.semantics { contentDescription = "Prevent Dialog: Continue" },
                 shape = RoundedCornerShape(50.dp),
                 colors = ButtonDefaults.buttonColors(backgroundColor = confirmButtonColor),
                 onClick = {
@@ -87,6 +92,7 @@ fun PreventDialog(
         },
         dismissButton = {
             Button(
+                modifier = Modifier.semantics { contentDescription = "Prevent Dialog: Cancel" },
                 shape = RoundedCornerShape(50.dp),
                 colors = ButtonDefaults.buttonColors(backgroundColor = dismissButtonColor),
                 onClick = {

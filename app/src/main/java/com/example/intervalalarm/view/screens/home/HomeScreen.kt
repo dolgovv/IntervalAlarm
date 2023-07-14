@@ -1,6 +1,7 @@
 package com.example.intervalalarm.view.screens.home
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -31,12 +32,15 @@ import com.example.intervalalarm.view.screens.home.states.HomeScreenUiState
 import com.example.intervalalarm.model.navigation.Screens
 import com.example.intervalalarm.view.common_components.DialogType
 import com.example.intervalalarm.view.common_components.PreventDialog
+import com.example.intervalalarm.view.screens.home.states.AlarmUiState
 import com.example.intervalalarm.viewmodel.MainViewModel
 
 @Composable
 fun HomeScreen(
-    vm: MainViewModel, navController: NavController,
-    state: HomeScreenUiState
+    state: HomeScreenUiState, navController: NavController,
+    triggerAlarm: (AlarmUiState) -> Unit,
+
+    deleteAllAlarms: (Context) -> Unit
 ) {
     val context = LocalContext.current
 
@@ -53,28 +57,6 @@ fun HomeScreen(
             "${state.upcomingAlarm.seconds}s"
         }
     }
-
-    val isPermissionsGranted =
-        if (Build.VERSION.SDK_INT >= 33) {
-
-            checkSelfPermission(
-                context,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-                    && checkSelfPermission(
-                context,
-                Manifest.permission.SCHEDULE_EXACT_ALARM
-            ) == PackageManager.PERMISSION_GRANTED
-
-        } else if (Build.VERSION.SDK_INT >= 31) {
-            checkSelfPermission(
-                context,
-                Manifest.permission.SCHEDULE_EXACT_ALARM
-            ) == PackageManager.PERMISSION_GRANTED
-
-        } else {
-            true
-        }
 
     val showPermissionDialog = remember {
         mutableStateOf(false)
@@ -111,14 +93,14 @@ fun HomeScreen(
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .padding(vertical = 22.dp)
-                        .clickable { vm.deleteAllAlarms(context) })
+                        .clickable { deleteAllAlarms(context) })
             }
 
             Text(text = if (enabledList.isNotEmpty()) "Interval is $formattedInterval" else "",
                 fontSize = 28.sp,
                 modifier = Modifier
                     .padding(vertical = 12.dp)
-                    .clickable { vm.deleteAllAlarms(context) })
+                    .clickable { deleteAllAlarms(context) })
         }
 
         AlarmList(list = list,
@@ -128,14 +110,15 @@ fun HomeScreen(
                 certainAlarm.id == it
             }?.let { alarmState ->
 
-                vm.triggerAlarm(context = context, alarmState, infoToast = {
-                    Toast.makeText(
+                if (IntervalPermissionManager().isPermissionGranted(
                         context,
-                        "Schedule cleared!",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                },
-                    showPermissionDialog = { showPermissionDialog.value = true })
+                        android.Manifest.permission.POST_NOTIFICATIONS
+                    )
+                ) {
+                    triggerAlarm(alarmState)
+                } else {
+                    showPermissionDialog.value = true
+                }
             }
         }
     }

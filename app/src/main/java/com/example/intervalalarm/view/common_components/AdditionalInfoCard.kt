@@ -16,6 +16,8 @@ import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.SoftwareKeyboardController
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -59,15 +61,6 @@ fun AdditionalInfoCard(
         }, chosenDate.hour, chosenDate.minute, false
     )
 
-    val currentScheduleFormatted =
-         if (schedule.isNotEmpty()) LocalDateTime.parse(schedule, DateTimeFormatter.ISO_LOCAL_DATE_TIME).format(timeFormatter)
-            .toString() else ""
-
-    val isSchedulePassed = LocalDateTime.parse(
-        LocalDateTime.now().toString(),
-        DateTimeFormatter.ISO_LOCAL_DATE_TIME
-    ).format(timeFormatter).toString() == currentScheduleFormatted
-
     if (showPastTimeDialog.value) {
         PreventDialog(context = context,
             type = DialogType.PassedTimeChosen,
@@ -76,8 +69,9 @@ fun AdditionalInfoCard(
             showPastTimeDialog.value = false
         }
     }
+
     Column(
-        modifier = Modifier,
+        modifier = Modifier.semantics { contentDescription = "Additional Info Card: Window" },
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
@@ -85,6 +79,9 @@ fun AdditionalInfoCard(
         /** DESCRIPTION PICKER */
         TextField(
             modifier = Modifier
+                .semantics {
+                    contentDescription = "Prevent Dialog: Description Field"
+                }
                 .clip(MaterialTheme.shapes.medium)
                 .fillMaxWidth(),
             maxLines = 15,
@@ -118,7 +115,7 @@ fun AdditionalInfoCard(
 
         /** SCHEDULE PICKER */
         TextField(
-            modifier = Modifier
+            modifier = Modifier.semantics { contentDescription = "Prevent Dialog: Schedule Field" }
                 .clickable {
                     if (isEditable) {
                         timePickerDialog.show()

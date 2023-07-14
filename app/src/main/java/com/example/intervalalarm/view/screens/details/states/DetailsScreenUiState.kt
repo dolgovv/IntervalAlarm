@@ -5,7 +5,7 @@ import com.example.intervalalarm.view.screens.home.states.AlarmUiState
 import com.example.intervalalarm.view.screens.new_alarm.states.WheelPickerUiState
 
 data class DetailsScreenUiState(
-    val chosenAlarm: AlarmUiState = AlarmUiState("",1, AlarmStatus.Disabled, 1,1,1," ", "", ""),
+    val chosenAlarm: AlarmUiState = AlarmUiState(),
     val isEditable: Boolean = false,
     val newTitle: String = "",
     val newDescription: String = "",

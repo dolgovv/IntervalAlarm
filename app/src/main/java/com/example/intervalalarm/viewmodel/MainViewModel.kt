@@ -33,7 +33,7 @@ class MainViewModel @Inject constructor(
     private val deleteAlarmUseCase: DeleteAlarmUseCase,
     private val saveTitleUseCase: SaveTitleUseCase,
     private val saveDescriptionUseCase: SaveDescriptionUseCase,
-    private val saveScheduleUseCase: SaveScheduleUseCase
+    private val saveScheduleUseCase: SaveScheduleUseCase,
 ) : ViewModel() {
 
     init {
@@ -52,29 +52,13 @@ class MainViewModel @Inject constructor(
         context: Context,
         alarm: AlarmUiState,
         infoToast: () -> Unit,
-        showPermissionDialog: () -> Unit
+//        showPermissionDialog: () -> Unit
     ) {
-        val permMng = IntervalPermissionManager()
-
-        if (Build.VERSION.SDK_INT >= 33) {
-
-            if (permMng.isPermissionGranted(
-                    context,
-                    android.Manifest.permission.POST_NOTIFICATIONS
-                )
-            ) {
-
-                viewModelScope.launch {
-                    triggerAlarmStatusUseCase(context, alarm)
-                    if (alarm.status == AlarmStatus.Scheduled) {
-                        clearSchedule(alarm.id)
-                        infoToast()
-                    }
-
-                    Log.d("trigger scheduled", "triggered ${alarm.status}")
-                }
-            } else {
-                showPermissionDialog()
+        viewModelScope.launch {
+            triggerAlarmStatusUseCase(context, alarm)
+            if (alarm.status == AlarmStatus.Scheduled) {
+                clearSchedule(alarm.id)
+                infoToast()
             }
         }
     }
@@ -110,7 +94,7 @@ class MainViewModel @Inject constructor(
     private fun clearSchedule(id: String) =
         viewModelScope.launch { repository.clearSchedule(id = id) }
 
-    private suspend fun updateList() {
+    private fun updateList() = viewModelScope.launch {
         repository.allAlarms.collect { alarms ->
 
             _homeScreenUiState.update { currentState ->
@@ -153,7 +137,15 @@ class MainViewModel @Inject constructor(
     fun triggerEditableDetails() {
         viewModelScope.launch {
             _detailsScreenUiState.update {
-                it.copy(isEditable = !it.isEditable, newSchedule = "", newDescription = "")
+                it.copy(
+                    isEditable = !it.isEditable,
+//                    newSchedule = "", newDescription = ""
+                    detailsWheelPicker = WheelPickerUiState(
+                        _detailsScreenUiState.value.chosenAlarm.hours,
+                        _detailsScreenUiState.value.chosenAlarm.minutes,
+                        _detailsScreenUiState.value.chosenAlarm.seconds,
+                    )
+                )
             }
         }
     }

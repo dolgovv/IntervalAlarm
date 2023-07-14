@@ -10,12 +10,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.intervalalarm.R
-
 @Composable
 fun IntervalFloatButton(
     function: () -> Unit,
@@ -26,7 +26,7 @@ fun IntervalFloatButton(
     iconColor: Color = Color.White.copy(alpha = 0.8f)
 ) {
     Surface(
-        modifier = Modifier
+        modifier = Modifier.semantics { contentDescription = "Main Button" }
             .heightIn(50.dp, 100.dp)
             .widthIn(50.dp, 170.dp),
         shape = RoundedCornerShape(50.dp),

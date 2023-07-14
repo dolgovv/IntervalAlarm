@@ -1,7 +1,9 @@
 package com.example.intervalalarm.model.navigation
 
 import android.os.Build
+import android.widget.Toast
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -20,10 +22,11 @@ fun NavScreens(
     autoNavigateTo: Int?
 ) {
 
+    val context = LocalContext.current
+
     val homeState by vm.homeScreenUiState.collectAsState()
     val detailsState by vm.detailsScreenUiState.collectAsState()
     val addNewState by vm.addNewAlarmUiState.collectAsState()
-
 
     NavHost(
         navController = navController,
@@ -34,9 +37,18 @@ fun NavScreens(
         composable(route = Screens.HomeScreen.route) {
 
             HomeScreen(
-                vm = vm,
                 navController = navController,
-                state = homeState
+                state = homeState,
+                triggerAlarm = {
+                    vm.triggerAlarm(context, it, infoToast = {
+                        Toast.makeText(
+                            context,
+                            "Schedule cleared!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    })
+                },
+                deleteAllAlarms = { vm.deleteAllAlarms(it) }
             )
         }
 
@@ -45,9 +57,19 @@ fun NavScreens(
 
             NewAlarmScreen(
                 state = addNewState,
-                list = homeState.allAlarms,
-                vm = vm,
+                alarmsLastIndex = if (homeState.allAlarms.isNotEmpty()) homeState.allAlarms.last().count + 1 else 1,
                 navController = navController,
+
+                updateDescription = { vm.updateDescription(it) },
+                updateSchedule = { vm.updateSchedule(it) },
+
+                updateNewHour = { vm.updateNewHour(it) },
+                updateNewMinute = { vm.updateNewMinute(it) },
+                updateNewSecond = { vm.updateNewSecond(it) },
+
+                addNewAlarm = { vm.addNewAlarm(context, it) },
+                hideBackPressedNewAlarmDialog = { vm.hideBackPressedNewAlarmDialog() },
+                clearNewAlarm = { vm.clearNewAlarm() },
                 onBackPressed = {
                     if (
                         addNewState.title.isNotEmpty()
@@ -74,10 +96,25 @@ fun NavScreens(
                 vm.updateDetailsScreen(it)
             }
             DetailsScreen(
-                vm = vm,
                 state = detailsState,
                 navController = navController,
-                currentAlarm = detailsState.chosenAlarm,
+                chosenAlarm = detailsState.chosenAlarm,
+
+                updateEditedTitle = { vm.updateEditedTitle(it) },
+                updateEditedDescription = { vm.updateEditedDescription(it) },
+                updateEditedSchedule = { vm.updateEditedSchedule(it) },
+
+                updateDetailsWheelStateHour = { vm.updateDetailsWheelStateHour(it) },
+                updateDetailsWheelStateMinute = { vm.updateDetailsWheelStateMinute(it) },
+                updateDetailsWheelStateSecond = { vm.updateDetailsWheelStateSecond(it) },
+
+                deleteAlarm = { vm.deleteAlarm(context, it) },
+                clearNewAlarm = { vm.clearNewAlarm() },
+
+                triggerEditableDetails = { vm.triggerEditableDetails() },
+                saveEditedAlarm = { vm.saveEditedAlarm(context) },
+                clearDetailsScreen = { vm.clearDetailsScreen() },
+                hideBackPressedDetailsDialog = { vm.hideBackPressedDetailsDialog() },
                 onBackPressed = { vm.showBackPressedDetailsDialog() })
         }
     }
