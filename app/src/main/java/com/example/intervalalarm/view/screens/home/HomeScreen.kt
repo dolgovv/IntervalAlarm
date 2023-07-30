@@ -18,6 +18,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,7 +39,11 @@ import com.example.intervalalarm.viewmodel.MainViewModel
 
 @Composable
 fun HomeScreen(
-    state: HomeScreenUiState, navController: NavController,
+    state: HomeScreenUiState,
+//    navController: NavController,
+
+    openDetails: (Int) -> Unit,
+    openAddNew: () -> Unit,
     triggerAlarm: (AlarmUiState) -> Unit,
 
     deleteAllAlarms: (Context) -> Unit
@@ -67,7 +73,7 @@ fun HomeScreen(
     ) else true
 
     Column(
-        modifier = Modifier
+        modifier = Modifier.semantics { contentDescription = "Home Screen" }
             .fillMaxSize()
             .padding(12.dp), verticalArrangement = Arrangement.Top
     ) {
@@ -105,7 +111,12 @@ fun HomeScreen(
 
         AlarmList(list = list,
             listState = listState,
-            openDetails = { navController.navigate(Screens.DetailsScreen.withArgs(it)) }) {
+            openDetails = {
+                openDetails(it)
+
+//                navController.navigate(Screens.DetailsScreen.withArgs(it))
+
+            }) {
             state.allAlarms.find { certainAlarm ->
                 certainAlarm.id == it
             }?.let { alarmState ->
@@ -125,8 +136,7 @@ fun HomeScreen(
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(22.dp),
+            .fillMaxSize(),
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.End
     ) {
@@ -149,10 +159,10 @@ fun HomeScreen(
         IntervalFloatButton(
             function = {
                 if (isPerm) {
-                    navController.navigate(Screens.NewAlarmScreen.route)
-                } else {
-                    showPermissionDialog.value = true
-                }
+
+                    openAddNew()
+//                    navController.navigate(Screens.NewAlarmScreen.route)
+                } else { showPermissionDialog.value = true }
             }, hasIcon = true, isScheduled = false
         )
     }

@@ -51,8 +51,7 @@ class MainViewModel @Inject constructor(
     fun triggerAlarm(
         context: Context,
         alarm: AlarmUiState,
-        infoToast: () -> Unit,
-//        showPermissionDialog: () -> Unit
+        infoToast: () -> Unit
     ) {
         viewModelScope.launch {
             triggerAlarmStatusUseCase(context, alarm)
@@ -341,12 +340,9 @@ class MainViewModel @Inject constructor(
 
     fun clearDetailsScreen() {
         viewModelScope.launch {
-            delay(500)
             _detailsScreenUiState.update {
                 it.copy(
-                    chosenAlarm = AlarmUiState(
-                        "", 1, AlarmStatus.Disabled, 1, 1, 1, "null alarm", "", ""
-                    ), isEditable = false, newTitle = "", newDescription = "", newSchedule = ""
+                    isEditable = false
                 )
             }
         }

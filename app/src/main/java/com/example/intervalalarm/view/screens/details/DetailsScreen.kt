@@ -2,6 +2,7 @@ package com.example.intervalalarm.view.screens.details
 
 import android.content.Context
 import android.content.res.Configuration
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
@@ -15,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -39,11 +41,9 @@ import java.util.*
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun DetailsScreen(
-//    vm: MainViewModel,
     state: DetailsScreenUiState,
-    navController: NavController,
-    chosenAlarm: AlarmUiState,
 
+    popBackStack: () -> Unit,
     updateEditedTitle: (String) -> Unit,
     updateEditedDescription: (String) -> Unit,
     updateEditedSchedule: (String) -> Unit,
@@ -52,9 +52,8 @@ fun DetailsScreen(
     updateDetailsWheelStateMinute: (Int) -> Unit,
     updateDetailsWheelStateSecond: (Int) -> Unit,
 
-    deleteAlarm: (AlarmUiState) -> Unit,
-    clearNewAlarm: () -> Unit,
 
+    deleteAlarm: (AlarmUiState) -> Unit,
     triggerEditableDetails: () -> Unit,
     saveEditedAlarm: () -> Unit,
     clearDetailsScreen: () -> Unit,
@@ -76,19 +75,19 @@ fun DetailsScreen(
 
     val isAnyInfoChanged =
         (
-                (state.newTitle != chosenAlarm.title)
-                        || (state.newDescription != chosenAlarm.description)
+                (state.newTitle != state.chosenAlarm.title)
+                        || (state.newDescription != state.chosenAlarm.description)
                         || (
-                        (state.newSchedule != chosenAlarm.schedule)
-                        && (state.newSchedule.isNotEmpty())
+                        (state.newSchedule != state.chosenAlarm.schedule)
+                                && (state.newSchedule.isNotEmpty())
                         )
-                        || (state.detailsWheelPicker.currentHour != chosenAlarm.hours)
-                        || (state.detailsWheelPicker.currentMinute != chosenAlarm.minutes)
-                        || (state.detailsWheelPicker.currentSecond != chosenAlarm.seconds)
+                        || (state.newWheelPickerValues.currentHour != state.chosenAlarm.hours)
+                        || (state.newWheelPickerValues.currentMinute != state.chosenAlarm.minutes)
+                        || (state.newWheelPickerValues.currentSecond != state.chosenAlarm.seconds)
                 )
 
     val isIntervalValid =
-        (state.detailsWheelPicker.currentHour != 0) || (state.detailsWheelPicker.currentMinute != 0) || (state.detailsWheelPicker.currentSecond > 14)
+        (state.newWheelPickerValues.currentHour != 0) || (state.newWheelPickerValues.currentMinute != 0) || (state.newWheelPickerValues.currentSecond > 14)
 
 
     /** COLORS */
@@ -127,7 +126,8 @@ fun DetailsScreen(
                 onContinue = {
                     deleteAlarm(state.chosenAlarm)
                     showDeleteDialog.value = false
-                    navController.popBackStack()
+                    popBackStack()
+                    clearDetailsScreen()
                 })
         }
 
@@ -153,7 +153,7 @@ fun DetailsScreen(
                 onCancel = { hideBackPressedDetailsDialog() }) {
                 hideBackPressedDetailsDialog()
                 clearDetailsScreen()
-                navController.popBackStack()
+                popBackStack()
             }
         }
 
@@ -175,8 +175,8 @@ fun DetailsScreen(
                 hideDialog = { showLowSecondAmountDialog.value = false },
                 onCancel = {
                     showLowSecondAmountDialog.value = false
-                    navController.popBackStack()
-                    clearNewAlarm()
+                    clearDetailsScreen()
+                    popBackStack()
                 },
                 onContinue = { showLowSecondAmountDialog.value = false })
         }
@@ -184,7 +184,7 @@ fun DetailsScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.3f),
+                .fillMaxHeight(0.4f),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -193,23 +193,24 @@ fun DetailsScreen(
             ) {
 
                 /** WHEEL PICKER */
-                WheelIntervalPicker(
-                    state = state.detailsWheelPicker,
+                NewWheelIntervalPicker(
+
+                    defaultHour = state.chosenAlarm.hours,
+                    defaultMinute = state.chosenAlarm.minutes,
+                    defaultSecond = state.chosenAlarm.seconds,
+
+                    isEnabled = state.isEditable,
+                    highlightedNumbersColor = if (state.isEditable) detailsUiColor else Color.Gray,
+
                     updateHour = {
                         updateDetailsWheelStateHour(it)
                     },
                     updateMinute = {
                         updateDetailsWheelStateMinute(it)
                     },
-                    updateSeconds = {
+                    updateSecond = {
                         updateDetailsWheelStateSecond(it)
                     },
-
-                    defaultHour = state.chosenAlarm.hours,
-                    defaultMinute = state.chosenAlarm.minutes,
-                    defaultSecond = state.chosenAlarm.seconds,
-                    status = if (state.isEditable) WheelPickerStatus.Enabled else WheelPickerStatus.Disabled,
-                    highlightedNumbersColor = detailsUiColor
                 )
             }
         }
@@ -227,8 +228,8 @@ fun DetailsScreen(
 
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = if (state.newTitle != chosenAlarm.title) state.newTitle
-                    else if (chosenAlarm.title == "Alarm no. ${chosenAlarm.count}") "" else chosenAlarm.title,
+                    value = if (state.newTitle != state.chosenAlarm.title) state.newTitle
+                    else if (state.chosenAlarm.title == "Alarm no. ${state.chosenAlarm.count}") "" else state.chosenAlarm.title,
                     onValueChange = { updateEditedTitle(it) },
                     label = { Text(text = "Title") },
                     singleLine = true,
@@ -247,13 +248,13 @@ fun DetailsScreen(
                     }),
                 )
             } else {
-                Text(text = chosenAlarm.title, fontSize = 36.sp)
+                Text(text = state.chosenAlarm.title, fontSize = 36.sp)
             }
         }
 
         AdditionalInfoCard(
-            description = if (state.isEditable) state.newDescription else if (chosenAlarm.description.isEmpty()) "Empty description" else chosenAlarm.description,
-            schedule = if (state.isEditable) state.newSchedule.ifEmpty { chosenAlarm.schedule } else chosenAlarm.schedule,
+            description = if (state.isEditable) state.newDescription else if (state.chosenAlarm.description.isEmpty()) "Empty description" else state.chosenAlarm.description,
+            schedule = if (state.isEditable) state.newSchedule.ifEmpty { state.chosenAlarm.schedule } else state.chosenAlarm.schedule,
             onDescriptionChanged = {
                 updateEditedDescription(it)
             },
@@ -268,17 +269,39 @@ fun DetailsScreen(
     }
 
     /** FLOAT BUTTONS */
-    Column(
+    Row(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(22.dp),
-        verticalArrangement = Arrangement.Bottom,
-        horizontalAlignment = Alignment.End
+            .fillMaxSize(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Bottom
     ) {
+
+        IntervalFloatButton(
+            function = { showDeleteDialog.value = true },
+            isScheduled = state.chosenAlarm.schedule.isNotEmpty(),
+            hasIcon = true,
+            icon = Icons.Filled.Delete,
+            color = detailsUiColor
+        )
 
         IntervalFloatButton(
             function = {
                 if (state.isEditable) {
+
+//                    if (isAnyInfoChanged) {
+//
+//                        when {
+//                            !isIntervalValid -> { showLowSecondAmountDialog.value = true }
+//                            /** ADD SOME OTHER SCENARIOS */
+//
+//                            isIntervalValid /** && some other scenarios*/ -> {
+//                                showSaveDialog.value = true
+//                            }
+//                        }
+//
+//                    } else {
+//                        triggerEditableDetails()
+//                    }
 
                     if (isAnyInfoChanged) {
 
@@ -292,29 +315,13 @@ fun DetailsScreen(
                     }
                 } else {
                     triggerEditableDetails()
-                    updateEditedTitle(chosenAlarm.title)
-                    updateEditedDescription(chosenAlarm.description)
+                    updateEditedTitle(state.chosenAlarm.title)
+                    updateEditedDescription(state.chosenAlarm.description)
                 }
             },
-            isScheduled = chosenAlarm.schedule.isNotEmpty(),
+            isScheduled = state.chosenAlarm.schedule.isNotEmpty(),
             hasIcon = true,
             icon = if (state.isEditable) Icons.Filled.Done else Icons.Filled.Edit,
-            color = detailsUiColor
-        )
-    }
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(22.dp),
-        verticalArrangement = Arrangement.Bottom,
-        horizontalAlignment = Alignment.Start
-    ) {
-
-        IntervalFloatButton(
-            function = { showDeleteDialog.value = true },
-            isScheduled = chosenAlarm.schedule.isNotEmpty(),
-            hasIcon = true,
-            icon = Icons.Filled.Delete,
             color = detailsUiColor
         )
     }

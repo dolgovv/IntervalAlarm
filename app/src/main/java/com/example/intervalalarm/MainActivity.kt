@@ -101,7 +101,6 @@ class MainActivity : ComponentActivity() {
 
                         NavScreens(
                             navController = navController,
-                            vm = viewModel,
                             autoNavigateTo = intent.extras?.getInt("from_notification"),
                         )
                     }

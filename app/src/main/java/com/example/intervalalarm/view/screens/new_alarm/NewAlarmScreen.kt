@@ -32,9 +32,8 @@ import com.example.intervalalarm.viewmodel.MainViewModel
 @Composable
 fun NewAlarmScreen(
     state: AddNewScreenUiState,
-//    list: List<AlarmUiState>,
     alarmsLastIndex: Int,
-    navController: NavController,
+    popBackStack: () -> Unit,
 
     updateDescription: (String) -> Unit,
     updateSchedule: (String) -> Unit,
@@ -66,8 +65,7 @@ fun NewAlarmScreen(
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(12.dp),
+            .fillMaxSize(),
         verticalArrangement = Arrangement.Top
     ) {
 
@@ -80,7 +78,7 @@ fun NewAlarmScreen(
             ) {
                 hideBackPressedNewAlarmDialog()
                 clearNewAlarm()
-                navController.popBackStack()
+                popBackStack()
             }
         }
 
@@ -92,8 +90,8 @@ fun NewAlarmScreen(
                 hideDialog = { showZeroIntervalDialog.value = false },
                 onCancel = {
                     showZeroIntervalDialog.value = false
-                    navController.popBackStack()
                     clearNewAlarm()
+                    popBackStack()
                 },
                 onContinue = { showZeroIntervalDialog.value = false }
             )
@@ -106,7 +104,7 @@ fun NewAlarmScreen(
                 hideDialog = { showLowSecondAmountDialog.value = false },
                 onCancel = {
                     showLowSecondAmountDialog.value = false
-                    navController.popBackStack()
+                    popBackStack()
                     clearNewAlarm()
                 },
                 onContinue = { showLowSecondAmountDialog.value = false }
@@ -185,7 +183,6 @@ fun NewAlarmScreen(
                         addNewAlarm(
                             AlarmEntity(
                                 alarmCount = alarmsLastIndex,
-//                                if (list.isNotEmpty()) list.last().count + 1 else 1,
                                 isActive = state.schedule.isEmpty(),
                                 hours = state.wheelPickerState.currentHour,
                                 minutes = state.wheelPickerState.currentMinute,
@@ -197,7 +194,7 @@ fun NewAlarmScreen(
                                 schedule = state.schedule
                             )
                         )
-                        navController.popBackStack()
+                        popBackStack()
                         clearNewAlarm()
                     } else if (state.wheelPickerState.currentSecond in 1..14) {
                         showLowSecondAmountDialog.value = true
