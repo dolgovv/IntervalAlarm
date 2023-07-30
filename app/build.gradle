@@ -80,6 +80,8 @@ dependencies {
     // ...with Kotlin.
     kaptAndroidTest("com.google.dagger:hilt-android-compiler:2.46.1")
 
+    androidTestImplementation "androidx.navigation:navigation-testing:2.6.0"
+
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_ui_version"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_ui_version"
 }
