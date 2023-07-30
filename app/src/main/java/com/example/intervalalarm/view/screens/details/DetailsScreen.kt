@@ -1,8 +1,5 @@
 package com.example.intervalalarm.view.screens.details
 
-import android.content.Context
-import android.content.res.Configuration
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
@@ -17,25 +14,18 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import com.example.intervalalarm.R
 import com.example.intervalalarm.view.common_components.AdditionalInfoCard
 import com.example.intervalalarm.view.common_components.DialogType
 import com.example.intervalalarm.view.common_components.PreventDialog
-import com.example.intervalalarm.view.theme.IntervalAlarmTheme
 import com.example.intervalalarm.view.screens.details.states.DetailsScreenUiState
 import com.example.intervalalarm.view.common_components.IntervalFloatButton
 import com.example.intervalalarm.view.common_components.WheelIntervalPicker
-import com.example.intervalalarm.view.common_components.WheelPickerStatus
 import com.example.intervalalarm.view.screens.home.states.AlarmStatus
 import com.example.intervalalarm.view.screens.home.states.AlarmUiState
-import com.example.intervalalarm.viewmodel.MainViewModel
 import java.util.*
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -61,8 +51,6 @@ fun DetailsScreen(
     onBackPressed: () -> Unit
 ) {
     /** UTILITIES */
-    val context = LocalContext.current
-
     BackHandler(state.isEditable) { onBackPressed() }
 
     val focusManager = LocalFocusManager.current
@@ -119,7 +107,7 @@ fun DetailsScreen(
 
         /** DELETE DIALOG */
         if (showDeleteDialog.value) {
-            PreventDialog(context = context,
+            PreventDialog(
                 type = DialogType.DeleteAlarm,
                 hideDialog = { showDeleteDialog.value = false },
                 onCancel = { showDeleteDialog.value = false },
@@ -133,7 +121,7 @@ fun DetailsScreen(
 
         /** SAVE DIALOG */
         if (showSaveDialog.value) {
-            PreventDialog(context = context,
+            PreventDialog(
                 type = DialogType.SaveEdits,
                 hideDialog = { showSaveDialog.value = false },
                 onCancel = { showSaveDialog.value = false }) {
@@ -147,7 +135,7 @@ fun DetailsScreen(
 
         /** BACK PRESSED YET DIALOG */
         if (state.showBackPressedDialog) {
-            PreventDialog(context = context,
+            PreventDialog(
                 type = DialogType.Cancel,
                 hideDialog = { hideBackPressedDetailsDialog() },
                 onCancel = { hideBackPressedDetailsDialog() }) {
@@ -159,7 +147,7 @@ fun DetailsScreen(
 
         /** CANCEL DIALOG */
         if (showCancelDialog.value) {
-            PreventDialog(context = context,
+            PreventDialog(
                 type = DialogType.Cancel,
                 hideDialog = { showCancelDialog.value = false },
                 onCancel = { showCancelDialog.value = false }) {
@@ -170,7 +158,7 @@ fun DetailsScreen(
 
         /** LOW SECONDS AMOUNT DIALOG */
         if (showLowSecondAmountDialog.value) {
-            PreventDialog(context = context,
+            PreventDialog(
                 type = DialogType.LowSecondAmount,
                 hideDialog = { showLowSecondAmountDialog.value = false },
                 onCancel = {
@@ -193,7 +181,7 @@ fun DetailsScreen(
             ) {
 
                 /** WHEEL PICKER */
-                NewWheelIntervalPicker(
+                WheelIntervalPicker(
 
                     defaultHour = state.chosenAlarm.hours,
                     defaultMinute = state.chosenAlarm.minutes,
@@ -324,18 +312,5 @@ fun DetailsScreen(
             icon = if (state.isEditable) Icons.Filled.Done else Icons.Filled.Edit,
             color = detailsUiColor
         )
-    }
-}
-
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview2() {
-    IntervalAlarmTheme {
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-
-        }
     }
 }

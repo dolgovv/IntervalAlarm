@@ -1,6 +1,5 @@
 package com.example.intervalalarm.model.navigation
 
-import android.os.Build
 import android.widget.Toast
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
@@ -10,7 +9,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.intervalalarm.MainActivity
 import com.example.intervalalarm.view.screens.details.DetailsScreen
 import com.example.intervalalarm.view.screens.home.HomeScreen
 import com.example.intervalalarm.view.screens.new_alarm.NewAlarmScreen

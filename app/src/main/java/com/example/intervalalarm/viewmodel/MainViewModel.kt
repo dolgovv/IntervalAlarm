@@ -3,14 +3,11 @@ package com.example.intervalalarm.viewmodel
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Build
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.intervalalarm.model.data.database.AlarmEntity
 import com.example.intervalalarm.model.alarm_functionality.IntervalAlarmBroadcastReceiver
 import com.example.intervalalarm.model.alarm_functionality.IntervalAlarmManager
-import com.example.intervalalarm.model.permissions.IntervalPermissionManager
 import com.example.intervalalarm.model.data.repository.AlarmsRepository
 import com.example.intervalalarm.view.screens.details.states.DetailsScreenUiState
 import com.example.intervalalarm.view.screens.home.states.AlarmStatus
@@ -361,7 +358,6 @@ class MainViewModel @Inject constructor(
         _homeScreenUiState.value.allAlarms.map {
             deleteAlarm(context, alarm = it)
         }
-        updateList()
     }
 
     fun showBackPressedDetailsDialog() = viewModelScope.launch {

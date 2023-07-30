@@ -1,6 +1,5 @@
 package com.example.intervalalarm.view.screens.new_alarm
 
-import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
@@ -10,23 +9,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import com.example.intervalalarm.R
 import com.example.intervalalarm.model.data.database.AlarmEntity
-import com.example.intervalalarm.view.theme.IntervalAlarmTheme
 import com.example.intervalalarm.view.common_components.IntervalFloatButton
-import com.example.intervalalarm.view.screens.home.states.AlarmUiState
 import com.example.intervalalarm.view.common_components.AdditionalInfoCard
 import com.example.intervalalarm.view.common_components.DialogType
 import com.example.intervalalarm.view.common_components.PreventDialog
 import com.example.intervalalarm.view.common_components.WheelIntervalPicker
 import com.example.intervalalarm.view.screens.new_alarm.states.AddNewScreenUiState
-import com.example.intervalalarm.viewmodel.MainViewModel
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -47,7 +39,6 @@ fun NewAlarmScreen(
     clearNewAlarm: () -> Unit,
     onBackPressed: () -> Unit
 ) {
-    val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -73,8 +64,7 @@ fun NewAlarmScreen(
             PreventDialog(
                 type = DialogType.Cancel,
                 hideDialog = { hideBackPressedNewAlarmDialog() },
-                onCancel = { hideBackPressedNewAlarmDialog() },
-                context = context
+                onCancel = { hideBackPressedNewAlarmDialog() }
             ) {
                 hideBackPressedNewAlarmDialog()
                 clearNewAlarm()
@@ -85,7 +75,6 @@ fun NewAlarmScreen(
         /** ZERO INTERVAL DIALOG */
         if (showZeroIntervalDialog.value) {
             PreventDialog(
-                context = context,
                 type = DialogType.ZeroInterval,
                 hideDialog = { showZeroIntervalDialog.value = false },
                 onCancel = {
@@ -99,7 +88,7 @@ fun NewAlarmScreen(
 
         /** LOW SECOND AMOUNT DIALOG */
         if (showLowSecondAmountDialog.value) {
-            PreventDialog(context = context,
+            PreventDialog(
                 type = DialogType.LowSecondAmount,
                 hideDialog = { showLowSecondAmountDialog.value = false },
                 onCancel = {
@@ -205,20 +194,6 @@ fun NewAlarmScreen(
                 hasIcon = false,
                 isScheduled = state.schedule.isNotEmpty()
             )
-        }
-    }
-}
-
-
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview2() {
-    IntervalAlarmTheme {
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            //NewAlarmScreen(viewModel())
         }
     }
 }

@@ -1,6 +1,5 @@
 package com.example.intervalalarm.view.screens.details.states
 
-import com.example.intervalalarm.view.screens.home.states.AlarmStatus
 import com.example.intervalalarm.view.screens.home.states.AlarmUiState
 import com.example.intervalalarm.view.screens.new_alarm.states.WheelPickerUiState
 

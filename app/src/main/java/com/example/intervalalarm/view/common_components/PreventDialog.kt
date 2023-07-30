@@ -1,10 +1,10 @@
 package com.example.intervalalarm.view.common_components
 
-import android.content.Context
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -12,12 +12,12 @@ import com.example.intervalalarm.R
 
 @Composable
 fun PreventDialog(
-    context: Context,
     type: DialogType,
     hideDialog: () -> Unit,
     onCancel: () -> Unit,
     onContinue: () -> Unit,
 ) {
+    val context = LocalContext.current
     val dismissButtonColor = MaterialTheme.colors.secondary
     val confirmButtonColor = MaterialTheme.colors.secondaryVariant
 
