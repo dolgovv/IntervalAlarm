@@ -62,7 +62,7 @@ fun AdditionalInfoCard(
     )
 
     if (showPastTimeDialog.value) {
-        PreventDialog(context = context,
+        PreventDialog(
             type = DialogType.PassedTimeChosen,
             hideDialog = { showPastTimeDialog.value = false },
             onCancel = { showPastTimeDialog.value = false }) {

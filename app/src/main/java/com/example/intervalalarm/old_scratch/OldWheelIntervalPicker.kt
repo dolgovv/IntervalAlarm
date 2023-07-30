@@ -1,5 +1,6 @@
-package com.example.intervalalarm.view.common_components
+package com.example.intervalalarm.old_scratch
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,23 +17,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.intervalalarm.R
 import com.example.intervalalarm.view.screens.new_alarm.states.WheelPickerUiState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun WheelIntervalPicker(
+fun OldWheelIntervalPicker(
     state: WheelPickerUiState,
 
     updateHour: (Int) -> Unit,
     updateMinute: (Int) -> Unit,
     updateSeconds: (Int) -> Unit,
 
-    defaultHour: Int = 5,
-    defaultMinute: Int = 5,
-    defaultSecond: Int = 5,
+    defaultHour: Int = 0,
+    defaultMinute: Int = 0,
+    defaultSecond: Int = 0,
 
     status: WheelPickerStatus = WheelPickerStatus.Enabled,
     highlightedNumbersColor: Color = MaterialTheme.colors.primary
@@ -55,14 +55,20 @@ fun WheelIntervalPicker(
     val highlightedSecond = remember { mutableStateOf(state.currentSecond) }
 
     if (!isEnabled) {
-        LaunchedEffect(key1 = defaultHour) {
-            hoursListState.scrollToItem(defaultHour)
+        LaunchedEffect(key1 = state.currentHour) {
+//            withContext(Dispatchers.Default) {
+                hoursListState.scrollToItem(defaultHour)
+//            }
         }
-        LaunchedEffect(key1 = defaultMinute) {
-            minutesListState.scrollToItem(defaultMinute)
+        LaunchedEffect(key1 = state.currentMinute) {
+//            withContext(Dispatchers.Default) {
+                minutesListState.scrollToItem(defaultMinute)
+//            }
         }
-        LaunchedEffect(key1 = defaultSecond) {
-            secondsListState.scrollToItem(defaultSecond)
+        LaunchedEffect(key1 = state.currentSecond) {
+//            withContext(Dispatchers.Default) {
+                secondsListState.scrollToItem(defaultSecond)
+//            }
         }
     }
 
@@ -282,21 +288,24 @@ fun WheelCoroutine(
     isEnabled: Boolean = true
 ) {
     if (isEnabled) {
-        LaunchedEffect(key1 = listState.firstVisibleItemIndex) {
+        LaunchedEffect(key1 = listState.firstVisibleItemIndex, listState.isScrollInProgress) {
             updateHighlighted(listState.firstVisibleItemIndex)
-            delay(100)
+
+                delay(100)
+                swipeCoroutine.launch {
+                    listState.animateScrollToItem(listState.firstVisibleItemIndex)
+                    updateState(listState.firstVisibleItemIndex)
+                    Log.d("wheelcheck", "upd from newWheelCoroutine")
+                }
+
+        }
+    } else {
+        LaunchedEffect(key1 = listState.firstVisibleItemIndex) {
             swipeCoroutine.launch {
-                listState.animateScrollToItem(listState.firstVisibleItemIndex)
+                listState.scrollToItem(listState.firstVisibleItemIndex)
                 updateState(listState.firstVisibleItemIndex)
             }
         }
-//    } else {
-//        LaunchedEffect(key1 = listState.firstVisibleItemIndex) {
-//            swipeCoroutine.launch {
-//                listState.scrollToItem(listState.firstVisibleItemIndex)
-//                updateState(listState.firstVisibleItemIndex)
-//            }
-//        }
     }
 }
 

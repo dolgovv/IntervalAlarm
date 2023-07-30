@@ -130,17 +130,15 @@ class MainViewModel @Inject constructor(
     private val _detailsScreenUiState = MutableStateFlow(DetailsScreenUiState())
     val detailsScreenUiState = _detailsScreenUiState.asStateFlow()
 
+    private val _wheelPickerDetailsUiState = MutableStateFlow(WheelPickerUiState())
+    private val wheelPickerDetailsUiState = _wheelPickerDetailsUiState.asStateFlow()
+
     fun triggerEditableDetails() {
         viewModelScope.launch {
+
             _detailsScreenUiState.update {
                 it.copy(
-                    isEditable = !it.isEditable,
-//                    newSchedule = "", newDescription = ""
-                    detailsWheelPicker = WheelPickerUiState(
-                        _detailsScreenUiState.value.chosenAlarm.hours,
-                        _detailsScreenUiState.value.chosenAlarm.minutes,
-                        _detailsScreenUiState.value.chosenAlarm.seconds,
-                    )
+                    isEditable = !it.isEditable
                 )
             }
         }
@@ -166,153 +164,181 @@ class MainViewModel @Inject constructor(
         val newDescription = _detailsScreenUiState.asStateFlow().value.newDescription
         val newSchedule = _detailsScreenUiState.asStateFlow().value.newSchedule
 
-        val wheelState = _detailsScreenUiState.asStateFlow().value.detailsWheelPicker
+        val wheelState = _wheelPickerDetailsUiState.asStateFlow().value
 
-        val isTitleNew =
+        var isTitleNew =
             detailsScreenUiState.value.chosenAlarm.title != detailsScreenUiState.value.newTitle
 
-        val isDescriptionNew =
+        var isDescriptionNew =
             detailsScreenUiState.value.chosenAlarm.description != detailsScreenUiState.value.newDescription
 
-        val isScheduleNew =
+        var isScheduleNew =
             (detailsScreenUiState.value.chosenAlarm.schedule != detailsScreenUiState.value.newSchedule) && (detailsScreenUiState.value.newSchedule.isNotEmpty())
 
-        val isHourNew =
-            detailsScreenUiState.value.detailsWheelPicker.currentHour != detailsScreenUiState.value.chosenAlarm.hours
+        var isHourNew =
+            detailsScreenUiState.value.newWheelPickerValues.currentHour != detailsScreenUiState.value.chosenAlarm.hours
 
-        val isMinuteNew =
-            detailsScreenUiState.value.detailsWheelPicker.currentMinute != detailsScreenUiState.value.chosenAlarm.minutes
+        var isMinuteNew =
+            detailsScreenUiState.value.newWheelPickerValues.currentMinute != detailsScreenUiState.value.chosenAlarm.minutes
 
-        val isSecondNew =
-            detailsScreenUiState.value.detailsWheelPicker.currentSecond != detailsScreenUiState.value.chosenAlarm.seconds
-
+        var isSecondNew =
+            detailsScreenUiState.value.newWheelPickerValues.currentSecond != detailsScreenUiState.value.chosenAlarm.seconds
 
         runBlocking {
 
-            if (isTitleNew) {
-                launch {
+            while (isHourNew
+                || isMinuteNew
+                || isSecondNew
+                || isTitleNew
+                || isDescriptionNew
+                || isScheduleNew
+            ) {
 
-                    IntervalAlarmManager(context).cancelAlarm(pI)
-                    saveTitleUseCase(
-                        id, title = newTitle
-                    )
-                    setIntervalAlarm(
-                        context,
-                        alarm = detailsScreenUiState.value.chosenAlarm.copy(title = newTitle)
-                    )
-                }.join()
-            }
 
-            if (isDescriptionNew) {
-                launch {
+                when {
 
-                    saveDescriptionUseCase(
-                        id, description = newDescription
-                    )
-                    IntervalAlarmManager(context).cancelAlarm(pI)
-                    setIntervalAlarm(
-                        context,
-                        alarm = detailsScreenUiState.value.chosenAlarm.copy(description = newDescription)
-                    )
-                }.join()
-            }
+                    isHourNew -> {
 
-            if (isScheduleNew) {
-                launch {
-
-                    if (detailsScreenUiState.value.chosenAlarm.status == AlarmStatus.Enabled) {
-                        triggerAlarmStatusUseCase(
-                            context, alarm = detailsScreenUiState.value.chosenAlarm
-                        )
-                    }
-                    IntervalAlarmManager(context).cancelAlarm(pI)
-                    saveScheduleUseCase(id, newSchedule = newSchedule)
-                    setIntervalAlarm(
-                        context,
-                        alarm = detailsScreenUiState.value.chosenAlarm.copy(schedule = newSchedule)
-                    )
-                    _detailsScreenUiState.update { detScreenState ->
-                        detScreenState.copy(
-                            chosenAlarm = detScreenState.chosenAlarm.copy(status = AlarmStatus.Scheduled)
-                        )
+                        launch {
+                            IntervalAlarmManager(context).cancelAlarm(pI)
+                            saveDetailsHour(
+                                id, wheelState.currentHour
+                            )
+                            if (detailsScreenUiState.value.chosenAlarm.toEntity().isActive) {
+                                setIntervalAlarm(
+                                    context,
+                                    alarm = detailsScreenUiState.value.chosenAlarm.copy(hours = detailsScreenUiState.value.newWheelPickerValues.currentHour)
+                                )
+                            }
+                            isHourNew = false
+                        }.join()
                     }
 
-                }.join()
-            }
+                    isMinuteNew -> {
 
-            if (isHourNew) {
-                launch {
+                        launch {
+                            IntervalAlarmManager(context).cancelAlarm(pI)
+                            saveDetailsMinute(
+                                id, wheelState.currentMinute
+                            )
+                            if (detailsScreenUiState.value.chosenAlarm.toEntity().isActive) {
+                                setIntervalAlarm(
+                                    context,
+                                    alarm = detailsScreenUiState.value.chosenAlarm.copy(minutes = detailsScreenUiState.value.newWheelPickerValues.currentMinute)
+                                )
+                            }
+                            isMinuteNew = false
+                        }.join()
+                    }
 
-                    IntervalAlarmManager(context).cancelAlarm(pI)
-                    saveDetailsHour(
-                        id, wheelState.currentHour
-                    )
-                    setIntervalAlarm(
-                        context,
-                        alarm = detailsScreenUiState.value.chosenAlarm.copy(hours = detailsScreenUiState.value.detailsWheelPicker.currentHour)
-                    )
-                }.join()
-            }
+                    isSecondNew -> {
 
-            if (isMinuteNew) {
-                launch {
+                        launch {
+                            IntervalAlarmManager(context).cancelAlarm(pI)
+                            saveDetailsSecond(
+                                id, wheelState.currentSecond
+                            )
+                            if (detailsScreenUiState.value.chosenAlarm.toEntity().isActive) {
+                                setIntervalAlarm(
+                                    context,
+                                    alarm = detailsScreenUiState.value.chosenAlarm.copy(seconds = detailsScreenUiState.value.newWheelPickerValues.currentSecond)
+                                )
+                            }
+                            isSecondNew = false
+                        }.join()
+                    }
 
-                    IntervalAlarmManager(context).cancelAlarm(pI)
-                    saveDetailsMinute(
-                        id, wheelState.currentMinute
-                    )
-                    setIntervalAlarm(
-                        context,
-                        alarm = detailsScreenUiState.value.chosenAlarm.copy(minutes = detailsScreenUiState.value.detailsWheelPicker.currentMinute)
-                    )
-                }.join()
-            }
+                    isTitleNew -> launch {
 
-            if (isSecondNew) {
-                launch {
+                        IntervalAlarmManager(context).cancelAlarm(pI)
+                        saveTitleUseCase(
+                            id, title = newTitle
+                        )
+                        if (detailsScreenUiState.value.chosenAlarm.toEntity().isActive) {
+                            setIntervalAlarm(
+                                context,
+                                alarm = detailsScreenUiState.value.chosenAlarm.copy(title = newTitle)
+                            )
+                        }
+                        isTitleNew = false
+                    }.join()
 
-                    IntervalAlarmManager(context).cancelAlarm(pI)
-                    saveDetailsSecond(
-                        id, wheelState.currentSecond
-                    )
-                    setIntervalAlarm(
-                        context,
-                        alarm = detailsScreenUiState.value.chosenAlarm.copy(seconds = detailsScreenUiState.value.detailsWheelPicker.currentSecond)
-                    )
-                }.join()
+                    isDescriptionNew -> launch {
+                        saveDescriptionUseCase(
+                            id, description = newDescription
+                        )
+                        IntervalAlarmManager(context).cancelAlarm(pI)
+                        if (detailsScreenUiState.value.chosenAlarm.toEntity().isActive) {
+                            setIntervalAlarm(
+                                context,
+                                alarm = detailsScreenUiState.value.chosenAlarm.copy(description = newDescription)
+                            )
+                        }
+                        isDescriptionNew = false
+                    }.join()
+
+                    isScheduleNew -> launch {
+
+                        saveScheduleUseCase(id, newSchedule = newSchedule)
+                        setIntervalAlarm(
+                            context,
+                            alarm = detailsScreenUiState.value.chosenAlarm.copy(schedule = newSchedule)
+                        )
+                        if (detailsScreenUiState.value.chosenAlarm.status == AlarmStatus.Enabled) {
+                            triggerAlarmStatusUseCase(
+                                context, alarm = detailsScreenUiState.value.chosenAlarm
+                            )
+                        }
+                        isScheduleNew = false
+//                    IntervalAlarmManager(context).cancelAlarm(pI)
+//                    _detailsScreenUiState.update {
+//                        it.copy(
+//                            chosenAlarm = it.chosenAlarm.copy(status = AlarmStatus.Scheduled)
+//                        )
+//                    }
+                    }.join()
+                    else -> {  }
+                }
             }
         }
     }
 
     // WHEEL
-
-    fun updateDetailsWheelStateHour(hour: Int) = viewModelScope.launch {
-        updateWheelHour(hour)
-        _detailsScreenUiState.update { it.copy(detailsWheelPicker = _wheelUiState.value) }
+    fun updateDetailsWheelStateHour(newHour: Int) = viewModelScope.launch {
+        _wheelPickerDetailsUiState.update { it.copy(currentHour = newHour) }
+        _detailsScreenUiState.update {
+            it.copy(newWheelPickerValues = wheelPickerDetailsUiState.value)
+        }
     }
+
+    fun updateDetailsWheelStateMinute(newMinute: Int) = viewModelScope.launch {
+        _wheelPickerDetailsUiState.update { it.copy(currentMinute = newMinute) }
+        _detailsScreenUiState.update {
+            it.copy(newWheelPickerValues = wheelPickerDetailsUiState.value)
+        }
+    }
+
+    fun updateDetailsWheelStateSecond(newSecond: Int) = viewModelScope.launch {
+        _wheelPickerDetailsUiState.update { it.copy(currentSecond = newSecond) }
+        _detailsScreenUiState.update {
+            it.copy(newWheelPickerValues = wheelPickerDetailsUiState.value)
+        }
+    }
+
 
     private fun saveDetailsHour(id: String, newHour: Int) = viewModelScope.launch {
         repository.saveHour(id = id, newHour = newHour)
-    }
-
-    fun updateDetailsWheelStateMinute(minute: Int) = viewModelScope.launch {
-        updateWheelMinute(minute)
-        _detailsScreenUiState.update { it.copy(detailsWheelPicker = wheelUiState.value) }
+        _detailsScreenUiState.update { it.copy(newWheelPickerValues = wheelPickerDetailsUiState.value) }
     }
 
     private fun saveDetailsMinute(id: String, newMinute: Int) = viewModelScope.launch {
         repository.saveMinute(id = id, newMinute = newMinute)
-    }
-
-    fun updateDetailsWheelStateSecond(second: Int) = viewModelScope.launch {
-        updateWheelSecond(second)
-        _detailsScreenUiState.update {
-            it.copy(detailsWheelPicker = wheelUiState.value)
-        }
+        _detailsScreenUiState.update { it.copy(newWheelPickerValues = wheelPickerDetailsUiState.value) }
     }
 
     private fun saveDetailsSecond(id: String, newSecond: Int) = viewModelScope.launch {
         repository.saveSecond(id = id, newSecond = newSecond)
+        _detailsScreenUiState.update { it.copy(newWheelPickerValues = wheelPickerDetailsUiState.value) }
     }
 
     fun updateEditedTitle(newTitle: String) {
@@ -393,7 +419,7 @@ class MainViewModel @Inject constructor(
     fun updateNewHour(hour: Int) = viewModelScope.launch {
         updateWheelHour(hour)
         _addNewAlarmUiState.update {
-            it.copy(wheelPickerState = _wheelUiState.value)
+            it.copy(wheelPickerState = wheelUiState.value)
         }
     }
 
@@ -459,5 +485,4 @@ class MainViewModel @Inject constructor(
             it.copy(currentSecond = second)
         }
     }
-
 }

@@ -110,10 +110,15 @@ fun NewAlarmScreen(
 
             /** WHEEL PICKER */
             WheelIntervalPicker(
-                state = state.wheelPickerState,
-                updateHour = { updateNewHour(it) },
-                updateMinute = { updateNewMinute(it) },
-                updateSeconds = { updateNewSecond(it) }
+                updateHour = {
+                    updateNewHour(it)
+                },
+                updateMinute = {
+                    updateNewMinute(it)
+                },
+                updateSecond = {
+                    updateNewSecond(it)
+                }
             )
         }
 

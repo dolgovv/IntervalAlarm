@@ -9,7 +9,7 @@ data class DetailsScreenUiState(
     val newTitle: String = "",
     val newDescription: String = "",
     val newSchedule: String = "",
-    val detailsWheelPicker: WheelPickerUiState = WheelPickerUiState(),
+    val newWheelPickerValues: WheelPickerUiState = WheelPickerUiState(),
 
     val showBackPressedDialog: Boolean = false
 )

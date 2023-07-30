@@ -276,21 +276,6 @@ fun DetailsScreen(
             function = {
                 if (state.isEditable) {
 
-//                    if (isAnyInfoChanged) {
-//
-//                        when {
-//                            !isIntervalValid -> { showLowSecondAmountDialog.value = true }
-//                            /** ADD SOME OTHER SCENARIOS */
-//
-//                            isIntervalValid /** && some other scenarios*/ -> {
-//                                showSaveDialog.value = true
-//                            }
-//                        }
-//
-//                    } else {
-//                        triggerEditableDetails()
-//                    }
-
                     if (isAnyInfoChanged) {
 
                         if (isIntervalValid) {
