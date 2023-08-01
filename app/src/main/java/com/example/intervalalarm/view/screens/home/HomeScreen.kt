@@ -100,7 +100,8 @@ fun HomeScreen(
                     .clickable { deleteAllAlarms(context) })
         }
 
-        AlarmList(list = list,
+        AlarmList(
+            list = list,
             listState = listState,
             openDetails = {
                 openDetails(it)

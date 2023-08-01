@@ -115,11 +115,10 @@ fun AdditionalInfoCard(
 
         /** SCHEDULE PICKER */
         TextField(
-            modifier = Modifier.semantics { contentDescription = "Prevent Dialog: Schedule Field" }
-                .clickable {
-                    if (isEditable) {
-                        timePickerDialog.show()
-                    }
+            modifier = Modifier
+                .semantics { contentDescription = "Prevent Dialog: Schedule Field" }
+                .clickable(enabled = isEditable) {
+                    timePickerDialog.show()
                 }
                 .height(50.dp)
                 .fillMaxWidth(),
@@ -130,7 +129,7 @@ fun AdditionalInfoCard(
                 disabledIndicatorColor = Color.Transparent
             ),
             enabled = false,
-            readOnly = !isEditable,
+            readOnly = true,
             shape = MaterialTheme.shapes.small.copy(
                 bottomStart = CornerSize(22.dp),
                 bottomEnd = CornerSize(22.dp)

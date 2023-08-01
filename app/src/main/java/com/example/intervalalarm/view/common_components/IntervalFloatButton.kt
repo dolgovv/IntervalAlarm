@@ -27,8 +27,9 @@ fun IntervalFloatButton(
 ) {
     Surface(
         modifier = Modifier.semantics { contentDescription = "Main Button" }
-            .heightIn(50.dp, 100.dp)
-            .widthIn(50.dp, 170.dp),
+            .heightIn(50.dp, 270.dp)
+            .widthIn(50.dp, 170.dp)
+            .padding(22.dp),
         shape = RoundedCornerShape(50.dp),
         elevation = 10.dp
     ) {

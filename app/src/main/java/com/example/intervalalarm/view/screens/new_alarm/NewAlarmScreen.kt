@@ -56,7 +56,8 @@ fun NewAlarmScreen(
 
     Column(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .padding(horizontal = 12.dp),
         verticalArrangement = Arrangement.Top
     ) {
 
@@ -161,44 +162,43 @@ fun NewAlarmScreen(
             keyboardController,
             isEditable = true
         )
+    }
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(6.dp),
-            verticalArrangement = Arrangement.Bottom,
-            horizontalAlignment = Alignment.End
-        ) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.Bottom,
+        horizontalAlignment = Alignment.End
+    ) {
 
-            /** ADD NEW ALARM BUTTON */
-            IntervalFloatButton(
-                function = {
-                    if (isIntervalValid) {
-                        addNewAlarm(
-                            AlarmEntity(
-                                alarmCount = alarmsLastIndex,
-                                isActive = state.schedule.isEmpty(),
-                                hours = state.wheelPickerState.currentHour,
-                                minutes = state.wheelPickerState.currentMinute,
-                                seconds = state.wheelPickerState.currentSecond,
-                                title = title.value.ifEmpty {
-                                    "Alarm no. $alarmsLastIndex"
-                                },
-                                description = state.description,
-                                schedule = state.schedule
-                            )
+        /** ADD NEW ALARM BUTTON */
+        IntervalFloatButton(
+            function = {
+                if (isIntervalValid) {
+                    addNewAlarm(
+                        AlarmEntity(
+                            alarmCount = alarmsLastIndex,
+                            isActive = state.schedule.isEmpty(),
+                            hours = state.wheelPickerState.currentHour,
+                            minutes = state.wheelPickerState.currentMinute,
+                            seconds = state.wheelPickerState.currentSecond,
+                            title = title.value.ifEmpty {
+                                "Alarm no. $alarmsLastIndex"
+                            },
+                            description = state.description,
+                            schedule = state.schedule
                         )
-                        popBackStack()
-                        clearNewAlarm()
-                    } else if (state.wheelPickerState.currentSecond in 1..14) {
-                        showLowSecondAmountDialog.value = true
-                    } else {
-                        showZeroIntervalDialog.value = true
-                    }
-                },
-                hasIcon = false,
-                isScheduled = state.schedule.isNotEmpty()
-            )
-        }
+                    )
+                    popBackStack()
+                    clearNewAlarm()
+                } else if (state.wheelPickerState.currentSecond in 1..14) {
+                    showLowSecondAmountDialog.value = true
+                } else {
+                    showZeroIntervalDialog.value = true
+                }
+            },
+            hasIcon = false,
+            isScheduled = state.schedule.isNotEmpty()
+        )
     }
 }

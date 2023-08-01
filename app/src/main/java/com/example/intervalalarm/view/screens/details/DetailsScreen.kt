@@ -102,7 +102,7 @@ fun DetailsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(12.dp), verticalArrangement = Arrangement.Top
+            .padding(horizontal = 12.dp), verticalArrangement = Arrangement.Top
     ) {
 
         /** DELETE DIALOG */
