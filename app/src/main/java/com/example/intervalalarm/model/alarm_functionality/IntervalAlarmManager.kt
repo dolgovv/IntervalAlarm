@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.widget.Toast
+import com.example.intervalalarm.model.permissions.IntervalPermissionManager
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -26,7 +27,8 @@ class IntervalAlarmManager(private val context: Context) {
         seconds: Int
     ) {
 
-        if (context.checkSelfPermission(android.Manifest.permission.SCHEDULE_EXACT_ALARM) == PackageManager.PERMISSION_GRANTED) {
+        if (IntervalPermissionManager().isPermissionGranted(context, android.Manifest.permission.USE_EXACT_ALARM)
+            && IntervalPermissionManager().isPermissionGranted(context, android.Manifest.permission.SCHEDULE_EXACT_ALARM)) {
 
             val interval: Long =
                 (hours.toLong() * 1000 * 60 * 60) + minutes.toLong() * 1000 * 60 + seconds.toLong() * 1000

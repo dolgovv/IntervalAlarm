@@ -18,9 +18,17 @@ class IntervalPermissionManager {
 
                 if (Build.VERSION.SDK_INT >= 33) {
                     context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
-                } else {
-                    true
-                }
+                } else { true }
+
+            android.Manifest.permission.SCHEDULE_EXACT_ALARM ->
+                if (Build.VERSION.SDK_INT >= 33) {
+                    context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
+                } else { true }
+
+            android.Manifest.permission.USE_EXACT_ALARM ->
+                if (Build.VERSION.SDK_INT >= 33) {
+                    context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
+                } else { true }
 
             //ADD OTHER PERMISSION SCENARIOS
 
