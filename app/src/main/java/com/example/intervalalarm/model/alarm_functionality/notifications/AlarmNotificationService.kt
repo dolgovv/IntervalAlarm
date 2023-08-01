@@ -7,10 +7,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import com.example.intervalalarm.MainActivity
 import com.example.intervalalarm.R
+import com.example.intervalalarm.model.alarm_functionality.IntervalAlarmBroadcastReceiver
 
 class AlarmNotificationService(
     private val context: Context
@@ -19,19 +21,14 @@ class AlarmNotificationService(
         const val CHANNEL_RINGS_ID = "alarm_rings_channel"
         const val CHANNEL_INFO_ID = "reboot_channel"
         const val REBOOT_NOTIFICATION = 74183
+        const val ACTIVITY_INTENT = 12345678
+        const val TURN_OFF_INTENT = 98765321
     }
 
     private val notificationManager: NotificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     private val activityIntent = Intent(context, MainActivity::class.java)
-
-    fun createChannel(channel: NotificationChannel) {
-        notificationManager.createNotificationChannel(channel)
-    }
-
-    fun deleteChannel(channel: NotificationChannel) {
-        notificationManager.deleteNotificationChannel(channel.id)
-    }
+    private val turnOffIntent = Intent(context, IntervalAlarmBroadcastReceiver::class.java)
 
     fun showNotification(
         type: NotificationType,
@@ -56,6 +53,8 @@ class AlarmNotificationService(
                         alarmCount = alarmCount,
                         formattedInterval = formattedInterval
                     )
+                } else {
+                    Log.d("package:mine", "NOTIFICATION FAILED TO PROCEED IN AlarmNotificationService")
                 }
             }
         }
@@ -68,14 +67,14 @@ class AlarmNotificationService(
             activityIntent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-        val notification = NotificationCompat.Builder(context, CHANNEL_INFO_ID)
-            .setContentTitle("Device reboot!")
-            .setContentText("All of your alarms has been toggled off due to rebooting your device.")
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentIntent(activityPendingIntent)
-            .setTimeoutAfter(60 * 60 * 1000)
-            .build()
-        notificationManager.notify(REBOOT_NOTIFICATION, notification)
+        notificationManager.notify(
+            REBOOT_NOTIFICATION,
+            AlarmNotificationBuilder(context).getNotificationByType(
+                NotificationType.RebootNotification,
+                activityPendingIntent,
+                null, null, null
+            )
+        )
     }
 
     private fun ringAlarmNotification(
@@ -85,23 +84,40 @@ class AlarmNotificationService(
         formattedInterval: String
     ) {
         activityIntent.putExtra("from_notification", alarmCount)
+        turnOffIntent.putExtra("turn_it_off", alarmCount)
 
         val activityPendingIntent = PendingIntent.getActivity(
             context,
-            alarmCount,
+            ACTIVITY_INTENT,
             activityIntent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-        val notification = NotificationCompat.Builder(context, CHANNEL_RINGS_ID)
-            .setContentTitle("$title is ringing!")
-            .setContentText("Current interval is $formattedInterval. $description")
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentIntent(activityPendingIntent)
-            .setSound(Uri.parse("android.resource://" + context.packageName + "/" + R.raw.alarm_ringtone))
-            .setTimeoutAfter(60 * 60 * 1000)
-            .build()
 
-        notificationManager.notify(alarmCount, notification)
+        val turnOffPendingIntent = PendingIntent.getBroadcast(
+            context,
+            TURN_OFF_INTENT,
+            turnOffIntent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        notificationManager.notify(
+            alarmCount,
+            AlarmNotificationBuilder(context).getNotificationByType(
+                NotificationType.RingAlarm,
+                title = "$title is ringing!",
+                contentText = "Current interval is $formattedInterval. $description",
+                pendingIntent = activityPendingIntent,
+                additionalPendingIntent = turnOffPendingIntent
+            )
+        )
+    }
+
+    fun createChannel(channel: NotificationChannel) {
+        notificationManager.createNotificationChannel(channel)
+    }
+
+    fun deleteChannel(channel: NotificationChannel) {
+        notificationManager.deleteNotificationChannel(channel.id)
     }
 }
 

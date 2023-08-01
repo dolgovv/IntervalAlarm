@@ -1,12 +1,9 @@
 package com.example.intervalalarm.model.permissions
 
-import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import android.widget.Toast
-import androidx.core.app.ActivityCompat
-import com.example.intervalalarm.MainActivity
+import android.util.Log
 
 class IntervalPermissionManager {
 
@@ -28,6 +25,7 @@ class IntervalPermissionManager {
             //ADD OTHER PERMISSION SCENARIOS
 
             else -> {
+                Log.d("permissions", "else in isPermissionGranted at IntervalPermissionManager")
                 false
             }
         }

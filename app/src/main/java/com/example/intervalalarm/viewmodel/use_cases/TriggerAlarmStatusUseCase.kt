@@ -1,9 +1,6 @@
 package com.example.intervalalarm.viewmodel.use_cases
 
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
-import com.example.intervalalarm.model.alarm_functionality.IntervalAlarmBroadcastReceiver
 import com.example.intervalalarm.model.alarm_functionality.IntervalAlarmManager
 import com.example.intervalalarm.model.data.repository.AlarmsRepository
 import com.example.intervalalarm.view.screens.home.states.AlarmStatus
@@ -12,18 +9,11 @@ import javax.inject.Inject
 
 class TriggerAlarmStatusUseCase @Inject constructor(private val repository: AlarmsRepository) {
     suspend operator fun invoke(context: Context, alarm: AlarmUiState) {
-        val intent = Intent(context, IntervalAlarmBroadcastReceiver::class.java)
-
-        val pendingIntent = PendingIntent.getBroadcast(
-            context, alarm.count, intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
 
         if (alarm.status == AlarmStatus.Enabled) {
-            repository.triggerStatus(id = alarm.id, status = false)
-            IntervalAlarmManager(context).cancelAlarm(pendingIntent)
+            repository.triggerStatus(context = context, id = alarm.id, alarmCount = alarm.count, status = false)
         } else {
-            repository.triggerStatus(id = alarm.id, status = true)
+            repository.triggerStatus(context = context, id = alarm.id, alarmCount = alarm.count, status = true)
             IntervalAlarmManager(context).setAlarm(
                 alarm.title,
                 alarm.description,

@@ -1,6 +1,13 @@
 package com.example.intervalalarm.model.data.repository
 
+import android.app.Application
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import androidx.annotation.WorkerThread
+import androidx.compose.ui.platform.LocalContext
+import com.example.intervalalarm.model.alarm_functionality.IntervalAlarmBroadcastReceiver
+import com.example.intervalalarm.model.alarm_functionality.IntervalAlarmManager
 import com.example.intervalalarm.model.data.database.AlarmEntity
 import com.example.intervalalarm.model.data.database.AlarmsDAO
 import kotlinx.coroutines.CoroutineDispatcher
@@ -17,13 +24,43 @@ class AlarmsRepository(
 
     /** HOME SCREEN */
     @WorkerThread
-    suspend fun triggerStatus(id: String, status: Boolean) = withContext(defaultDispatcher) {
+    suspend fun triggerStatus(context: Context, id: String, alarmCount: Int, status: Boolean) = withContext(defaultDispatcher) {
+
+        val intent = Intent(context, IntervalAlarmBroadcastReceiver::class.java)
+
+        val pendingIntent = PendingIntent.getBroadcast(
+            context, alarmCount, intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        IntervalAlarmManager(context).cancelAlarm(pendingIntent)
         dao.triggerStatus(id, status)
+    }
+
+    @WorkerThread
+    suspend fun triggerStatusByCount(context: Context, alarmCount: Int, status: Boolean) = withContext(defaultDispatcher) {
+        val intent = Intent(context, IntervalAlarmBroadcastReceiver::class.java)
+
+        val pendingIntent = PendingIntent.getBroadcast(
+            context, alarmCount, intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        IntervalAlarmManager(context).cancelAlarm(pendingIntent)
+        dao.triggerStatusByCount(alarmCount, status)
     }
 
     @WorkerThread
     suspend fun clearSchedule(id: String) = withContext(defaultDispatcher) {
         dao.clearSchedule(id = id)
+    }
+
+    @WorkerThread
+    suspend fun clearScheduleByCount(count: Int) = withContext(defaultDispatcher) {
+        dao.clearScheduleByCount(count)
+    }
+
+    @WorkerThread
+    suspend fun disableAllAlarms() = withContext(defaultDispatcher) {
+        dao.disableAll()
     }
 
     /** NEW ALARM SCREEN */
@@ -34,7 +71,13 @@ class AlarmsRepository(
 
     /** DETAILS SCREEN */
     @WorkerThread
-    suspend fun deleteAlarm(alarm: AlarmEntity) = withContext(defaultDispatcher) {
+    suspend fun deleteAlarm(context: Context, alarm: AlarmEntity) = withContext(defaultDispatcher) {
+        val intent = Intent(context, IntervalAlarmBroadcastReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            context, alarm.alarmCount, intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        IntervalAlarmManager(context).cancelAlarm(pendingIntent)
         dao.deleteAlarm(alarm = alarm)
     }
     @WorkerThread

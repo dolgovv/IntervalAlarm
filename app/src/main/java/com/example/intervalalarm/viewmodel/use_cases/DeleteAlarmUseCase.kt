@@ -12,12 +12,6 @@ import javax.inject.Inject
 class DeleteAlarmUseCase @Inject constructor(private val repository: AlarmsRepository) {
 
     suspend operator fun invoke(context: Context, alarm: AlarmEntity){
-        repository.deleteAlarm(alarm = alarm)
-        val intent = Intent(context, IntervalAlarmBroadcastReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(
-            context, alarm.alarmCount, intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-        IntervalAlarmManager(context).cancelAlarm(pendingIntent)
+        repository.deleteAlarm(context = context, alarm = alarm)
     }
 }
