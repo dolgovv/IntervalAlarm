@@ -5,11 +5,9 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
+import android.media.AudioAttributes
 import android.net.Uri
 import android.util.Log
-import android.widget.Toast
-import androidx.core.app.NotificationCompat
 import com.example.intervalalarm.MainActivity
 import com.example.intervalalarm.R
 import com.example.intervalalarm.model.alarm_functionality.IntervalAlarmBroadcastReceiver
@@ -54,7 +52,21 @@ class AlarmNotificationService(
                         formattedInterval = formattedInterval
                     )
                 } else {
-                    Log.d("package:mine", "NOTIFICATION FAILED TO PROCEED IN AlarmNotificationService")
+                    Log.d(
+                        "package:mine",
+                        "NOTIFICATION FAILED TO PROCEED IN AlarmNotificationService"
+                    )
+                }
+            }
+
+            NotificationType.ScheduledAlarmRings -> {
+                if (title != null && description != null && alarmCount != null && formattedInterval != null) {
+                    scheduledAlarmNotification(
+                        alarmCount = alarmCount,
+                        title = title,
+                        description = description,
+                        formattedInterval = formattedInterval
+                    )
                 }
             }
         }
@@ -112,16 +124,78 @@ class AlarmNotificationService(
         )
     }
 
-    fun createChannel(channel: NotificationChannel) {
-        notificationManager.createNotificationChannel(channel)
+    private fun scheduledAlarmNotification(
+        alarmCount: Int,
+        title: String,
+        description: String,
+        formattedInterval: String
+    ) {
+
+        activityIntent.putExtra("from_notification", alarmCount)
+        turnOffIntent.putExtra("turn_it_off", alarmCount)
+
+        val activityPendingIntent = PendingIntent.getActivity(
+            context,
+            ACTIVITY_INTENT,
+            activityIntent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        val turnOffPendingIntent = PendingIntent.getBroadcast(
+            context,
+            TURN_OFF_INTENT,
+            turnOffIntent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        notificationManager.notify(
+            alarmCount,
+            AlarmNotificationBuilder(context).getNotificationByType(
+                NotificationType.ScheduledAlarmRings,
+                title = "$title has been started!",
+                contentText = "Scheduled alarm with interval for $formattedInterval just started. $description",
+                pendingIntent = activityPendingIntent,
+                additionalPendingIntent = turnOffPendingIntent
+            )
+        )
     }
 
-    fun deleteChannel(channel: NotificationChannel) {
-        notificationManager.deleteNotificationChannel(channel.id)
-    }
-}
+    fun createChannel(channelType: NotificationChannelType) {
 
-sealed class NotificationType {
-    object RingAlarm : NotificationType()
-    object RebootNotification : NotificationType()
+        if (notificationManager.notificationChannels.isEmpty()) {
+
+            Log.d("Channel test", "channels created")
+            when (channelType) {
+
+                NotificationChannelType.AlarmChannel -> {
+
+                    val channel = NotificationChannel(
+                        CHANNEL_RINGS_ID,
+                        "Alarm Notifications",
+                        NotificationManager.IMPORTANCE_HIGH
+                    )
+                    val att = AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_ALARM)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build()
+                    channel.description = "Notifies you when the alarm goes off"
+                    channel.setSound(
+                        Uri.parse("android.resource://" + context.packageName + "/" + R.raw.alarm_ringtone),
+                        att
+                    )
+                    notificationManager.createNotificationChannel(channel)
+                }
+
+                NotificationChannelType.InfoChannel -> {
+                    val channel = NotificationChannel(
+                        CHANNEL_INFO_ID,
+                        "Info notifications",
+                        NotificationManager.IMPORTANCE_DEFAULT
+                    )
+                    channel.description = "Important information provided by the application"
+                    notificationManager.createNotificationChannel(channel)
+                }
+            }
+        }
+    }
 }
