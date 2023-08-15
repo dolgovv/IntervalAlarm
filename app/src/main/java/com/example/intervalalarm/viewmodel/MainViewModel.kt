@@ -23,7 +23,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val repository: AlarmsRepository,
+    private val repository: AlarmsRepositoryDefault,
 
     private val addNewAlarmUseCase: AddNewAlarmUseCase,
     private val triggerAlarmStatusUseCase: TriggerAlarmStatusUseCase,
@@ -91,7 +91,7 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch { repository.clearSchedule(id = id) }
 
     private fun updateList() = viewModelScope.launch {
-        repository.allAlarms.collect { alarms ->
+        repository.getAllAlarms().collect { alarms ->
 
             _homeScreenUiState.update { currentState ->
                 currentState.copy(

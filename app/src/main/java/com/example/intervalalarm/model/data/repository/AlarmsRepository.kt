@@ -18,90 +18,124 @@ import kotlinx.coroutines.withContext
 class AlarmsRepository(
     private val dao: AlarmsDAO,
     private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
-    ) {
-
-    val allAlarms: Flow<List<AlarmEntity>> = dao.getAlarmsCounted()
+) : AlarmsRepositoryDefault {
 
     /** HOME SCREEN */
+
     @WorkerThread
-    suspend fun triggerStatus(context: Context, id: String, alarmCount: Int, status: Boolean) = withContext(defaultDispatcher) {
-
-        val intent = Intent(context, IntervalAlarmBroadcastReceiver::class.java)
-
-        val pendingIntent = PendingIntent.getBroadcast(
-            context, alarmCount, intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-        IntervalAlarmManager(context).cancelAlarm(pendingIntent)
-        dao.triggerStatus(id, status)
+    override fun getAllAlarms(): Flow<List<AlarmEntity>> {
+        return dao.getAlarmsCounted()
     }
 
     @WorkerThread
-    suspend fun triggerStatusByCount(context: Context, alarmCount: Int, status: Boolean) = withContext(defaultDispatcher) {
-        val intent = Intent(context, IntervalAlarmBroadcastReceiver::class.java)
+    override suspend fun triggerStatus(
+        context: Context,
+        alarm: AlarmEntity
+    ) = withContext(defaultDispatcher) {
 
-        val pendingIntent = PendingIntent.getBroadcast(
-            context, alarmCount, intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-        IntervalAlarmManager(context).cancelAlarm(pendingIntent)
-        dao.triggerStatusByCount(alarmCount, status)
-    }
-
-    @WorkerThread
-    suspend fun clearSchedule(id: String) = withContext(defaultDispatcher) {
-        dao.clearSchedule(id = id)
-    }
-
-    @WorkerThread
-    suspend fun clearScheduleByCount(count: Int) = withContext(defaultDispatcher) {
-        dao.clearScheduleByCount(count)
-    }
-
-    @WorkerThread
-    suspend fun disableAllAlarms() = withContext(defaultDispatcher) {
-        dao.disableAll()
-    }
-
-    /** NEW ALARM SCREEN */
-    @WorkerThread
-    suspend fun addAlarm(alarm: AlarmEntity) = withContext(defaultDispatcher) {
-        dao.addAlarm(alarm = alarm)
-    }
-
-    /** DETAILS SCREEN */
-    @WorkerThread
-    suspend fun deleteAlarm(context: Context, alarm: AlarmEntity) = withContext(defaultDispatcher) {
         val intent = Intent(context, IntervalAlarmBroadcastReceiver::class.java)
         val pendingIntent = PendingIntent.getBroadcast(
             context, alarm.alarmCount, intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-        IntervalAlarmManager(context).cancelAlarm(pendingIntent)
-        dao.deleteAlarm(alarm = alarm)
+
+        dao.triggerStatus(alarm.id, !alarm.isActive)
+
+        if (alarm.isActive) {
+            IntervalAlarmManager(context).cancelAlarm(pendingIntent)
+        } else {
+            IntervalAlarmManager(context).setAlarm(
+                alarm.title,
+                alarm.description,
+                alarm.alarmCount,
+                alarm.hours,
+                alarm.minutes,
+                alarm.seconds
+            )
+        }
     }
+
     @WorkerThread
-    suspend fun updateTitle(id: String, title: String) = withContext(defaultDispatcher) {
+    override suspend fun triggerStatusByCount(context: Context, alarmCount: Int, status: Boolean) =
+        withContext(defaultDispatcher) {
+            val intent = Intent(context, IntervalAlarmBroadcastReceiver::class.java)
+            val pendingIntent = PendingIntent.getBroadcast(
+                context, alarmCount, intent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+            IntervalAlarmManager(context).cancelAlarm(pendingIntent)
+            dao.triggerStatusByCount(alarmCount, status)
+        }
+
+    @WorkerThread
+    override suspend fun clearSchedule(id: String) = withContext(defaultDispatcher) {
+        dao.clearSchedule(id = id)
+    }
+
+    @WorkerThread
+    override suspend fun clearScheduleByCount(count: Int) = withContext(defaultDispatcher) {
+        dao.clearScheduleByCount(count)
+    }
+
+    @WorkerThread
+    override suspend fun disableAllAlarms() = withContext(defaultDispatcher) {
+        dao.disableAll()
+    }
+
+    @WorkerThread
+    override suspend fun haveEnabledAlarms(): Boolean {
+        return dao.getActiveAlarms().any { it.isActive }
+    }
+
+    /** NEW ALARM SCREEN */
+    @WorkerThread
+    override suspend fun addAlarm(alarm: AlarmEntity) = withContext(defaultDispatcher) {
+        dao.addAlarm(alarm = alarm)
+    }
+
+    /** DETAILS SCREEN */
+    @WorkerThread
+    override suspend fun deleteAlarm(context: Context, alarm: AlarmEntity) =
+        withContext(defaultDispatcher) {
+
+            val intent = Intent(context, IntervalAlarmBroadcastReceiver::class.java)
+            val pendingIntent = PendingIntent.getBroadcast(
+                context, alarm.alarmCount, intent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+            IntervalAlarmManager(context).cancelAlarm(pendingIntent)
+            dao.deleteAlarm(alarm = alarm)
+        }
+
+    @WorkerThread
+    override suspend fun updateTitle(id: String, title: String) = withContext(defaultDispatcher) {
         dao.updateTitle(id = id, title = title)
     }
+
     @WorkerThread
-    suspend fun updateDescription(id: String, description: String) = withContext(defaultDispatcher) {
-        dao.updateDescription(id = id, description = description)
-    }
+    override suspend fun updateDescription(id: String, description: String) =
+        withContext(defaultDispatcher) {
+            dao.updateDescription(id = id, description = description)
+        }
+
     @WorkerThread
-    suspend fun updateSchedule(id: String, schedule: String) = withContext(defaultDispatcher) {
-        dao.updateSchedule(id, schedule = schedule)
-    }
+    override suspend fun updateSchedule(id: String, schedule: String) =
+        withContext(defaultDispatcher) {
+            dao.updateSchedule(id, schedule = schedule)
+        }
+
     @WorkerThread
-    suspend fun saveHour(id: String, newHour: Int) = withContext(defaultDispatcher) {
+    override suspend fun saveHour(id: String, newHour: Int) = withContext(defaultDispatcher) {
         dao.saveHour(id = id, newHour = newHour)
     }
+
     @WorkerThread
-    suspend fun saveMinute(id: String, newMinute: Int) = withContext(defaultDispatcher) {
+    override suspend fun saveMinute(id: String, newMinute: Int) = withContext(defaultDispatcher) {
         dao.saveMinute(id = id, newMinute = newMinute)
     }
+
     @WorkerThread
-    suspend fun saveSecond(id: String, newSecond: Int) = withContext(defaultDispatcher) {
+    override suspend fun saveSecond(id: String, newSecond: Int) = withContext(defaultDispatcher) {
         dao.saveSecond(id = id, newSecond = newSecond)
     }
 }
