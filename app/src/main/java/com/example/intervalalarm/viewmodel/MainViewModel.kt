@@ -9,6 +9,7 @@ import com.example.intervalalarm.model.data.database.AlarmEntity
 import com.example.intervalalarm.model.alarm_functionality.IntervalAlarmBroadcastReceiver
 import com.example.intervalalarm.model.alarm_functionality.IntervalAlarmManager
 import com.example.intervalalarm.model.data.repository.AlarmsRepository
+import com.example.intervalalarm.model.data.repository.AlarmsRepositoryDefault
 import com.example.intervalalarm.view.screens.details.states.DetailsScreenUiState
 import com.example.intervalalarm.view.screens.home.states.AlarmStatus
 import com.example.intervalalarm.view.screens.home.states.AlarmUiState
@@ -39,7 +40,6 @@ class MainViewModel @Inject constructor(
 //            TODO("start all the alarms if not active yet (should be active actually)")
         }
     }
-
 
     /** HOME SCREEN */
     private val _homeScreenUiState = MutableStateFlow(HomeScreenUiState())
@@ -73,7 +73,7 @@ class MainViewModel @Inject constructor(
                 alarm.seconds
             )
         } else {
-            viewModelScope.launch {
+//            viewModelScope.launch {
                 IntervalAlarmManager(context).setScheduledAlarm(
                     alarm.title,
                     alarm.description,
@@ -83,7 +83,7 @@ class MainViewModel @Inject constructor(
                     alarm.minutes,
                     alarm.seconds
                 )
-            }
+//            }
         }
     }
 
@@ -186,7 +186,8 @@ class MainViewModel @Inject constructor(
 
         runBlocking {
 
-            while (isHourNew
+            while (
+                isHourNew
                 || isMinuteNew
                 || isSecondNew
                 || isTitleNew
@@ -297,7 +298,8 @@ class MainViewModel @Inject constructor(
 //                        )
 //                    }
                     }.join()
-                    else -> {  }
+
+                    else -> {}
                 }
             }
         }

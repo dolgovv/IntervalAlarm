@@ -16,7 +16,9 @@ android {
         versionCode 1
         versionName "1.0"
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+//        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "com.example.intervalalarm.HiltTestRunner"
+
 
         vectorDrawables {
             useSupportLibrary true
@@ -69,19 +71,28 @@ dependencies {
     implementation "androidx.compose.ui:ui:$compose_ui_version"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_ui_version"
     implementation 'androidx.compose.material:material:1.4.3'
-    testImplementation 'junit:junit:4.13.2'
+    debugImplementation "androidx.compose.ui:ui-tooling:$compose_ui_version"
+    debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_ui_version"
 
+
+    //TEST
+    testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+
+    testImplementation "org.mockito:mockito-core:$mockito_version"
+
+    testImplementation "io.mockk:mockk:$mockk_version"
+
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
-    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_ui_version"
-    // For instrumented tests.
+
+    androidTestImplementation "androidx.navigation:navigation-testing:2.6.0"
+
     androidTestImplementation('com.google.dagger:hilt-android-testing:2.46.1')
     // ...with Kotlin.
     kaptAndroidTest("com.google.dagger:hilt-android-compiler:2.46.1")
 
-    androidTestImplementation "androidx.navigation:navigation-testing:2.6.0"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6"
 
-    debugImplementation "androidx.compose.ui:ui-tooling:$compose_ui_version"
-    debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_ui_version"
+    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_ui_version"
 }
 
