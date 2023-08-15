@@ -11,7 +11,7 @@ interface AlarmsDAO {
     fun getAlarmsCounted(): Flow<List<AlarmEntity>>
 
     @Query("SELECT * FROM alarms_table WHERE isActive = :status")
-    fun getEnabledAlarms(status: Boolean = true): Flow<List<AlarmEntity>>
+    fun getActiveAlarms(status: Boolean = true): List<AlarmEntity>
 
     /** HOME SCREEN */
     @Query("UPDATE alarms_table SET isActive=:status WHERE id = :id")
@@ -39,11 +39,10 @@ interface AlarmsDAO {
 
     @Query("UPDATE alarms_table SET schedule =:schedule WHERE id = :id")
     suspend fun updateSchedule(id: String, schedule: String)
-//    @Query("UPDATE alarms_table SET isActive =:isActive WHERE id = :id")
-//    suspend fun changeStatus(id: String, isActive: Boolean)
 
     @Query("UPDATE alarms_table SET schedule = :blankSchedule WHERE id = :id")
     suspend fun clearSchedule(id: String, blankSchedule: String = "")
+
     @Query("UPDATE alarms_table SET schedule = :blankSchedule WHERE alarmCount = :count")
     suspend fun clearScheduleByCount(count: Int, blankSchedule: String = "")
 
@@ -58,7 +57,4 @@ interface AlarmsDAO {
 
     @Query("UPDATE alarms_table SET isActive = :status WHERE isActive != :status")
     suspend fun disableAll(status: Boolean = false)
-
-    @Query("SELECT * FROM alarms_table ORDER BY alarmCount ASC")
-    fun getGetGet(): Flow<List<AlarmEntity>>
 }
